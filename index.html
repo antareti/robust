@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&family=Fira+Code:wght@400;700&family=Anonymous+Pro&family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --primary-color: #00ff00;
@@ -67,7 +67,7 @@
             --upvote-bg: #800000;
             --delete-bg: #dc143c; /* Темно-красный */
         }
-
+        
         body {
             font-family: 'Source Code Pro', monospace;
             background-color: var(--background-color);
@@ -206,26 +206,59 @@
         .message-card .text-white {
             color: var(--text-color);
         }
+        /* Модальное окно */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            max-width: 400px;
+            text-align: center;
+        }
+        .modal-message {
+            color: var(--text-color);
+            margin-bottom: 16px;
+        }
+        .modal-button {
+            background-color: var(--primary-color);
+            color: var(--button-text-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-300 theme-hacker-green">
+<body class="bg-gray-900 text-gray-300 theme-deep-steak">
     <div class="header-bg py-4 mb-4">
         <div class="main-container mx-auto flex justify-between items-center px-4">
-            <div id="forum-title" class="text-3xl font-bold vt323 text-gray-50 glitch-text">Форум доброго хакера</div>
+            <div id="forum-title" class="text-3xl font-bold vt323 text-gray-50 glitch-text" style="color: var(--text-color); text-shadow: -1px 0 var(--secondary-color), 1px 0 var(--primary-color);">Форум доброго хакера</div>
             <div class="flex items-center space-x-4">
                 <div class="relative">
-                    <button id="theme-dropdown-btn" class="px-3 py-1 text-sm rounded-md bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors">
+                    <button id="theme-dropdown-btn" class="px-3 py-1 text-sm rounded-md bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors" style="background-color: var(--card-bg); color: var(--text-color);">
                         <i class="fas fa-palette"></i> Тема
                     </button>
                     <div id="theme-dropdown" class="absolute right-0 mt-2 py-2 w-40 bg-gray-800 rounded-md shadow-lg z-10 hidden" style="border: 1px solid var(--border-color);">
-                        <a href="#" data-theme="hacker-green" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors">Зеленый хакер</a>
-                        <a href="#" data-theme="cyber-purple" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors">Кибер-фиолетовый</a>
-                        <a href="#" data-theme="sunset-orange" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors">Оранжевый закат</a>
-                        <a href="#" data-theme="deep-steak" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors">Глубокий стейк</a>
+                        <a href="#" data-theme="hacker-green" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors" style="color: var(--text-color);">Зеленый хакер</a>
+                        <a href="#" data-theme="cyber-purple" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors" style="color: var(--text-color);">Кибер-фиолетовый</a>
+                        <a href="#" data-theme="sunset-orange" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors" style="color: var(--text-color);">Оранжевый закат</a>
+                        <a href="#" data-theme="deep-steak" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors" style="color: var(--text-color);">Глубокий стейк</a>
                     </div>
                 </div>
                 <nav id="auth-links">
-                    <a href="#" id="link-logout" class="text-gray-400 hover:text-white mx-2"><i class="fas fa-sign-out-alt"></i> Выход</a>
+                    <button id="link-logout" class="text-gray-400 hover:text-white mx-2" style="color: var(--text-color);"><i class="fas fa-sign-out-alt"></i> Выход</button>
                 </nav>
             </div>
         </div>
@@ -233,18 +266,18 @@
     
     <div class="main-container mx-auto px-4">
         <div class="bg-green-600 text-white font-bold p-3 text-center rounded-md mb-6 glitch-text" style="background-color: var(--primary-color); color: var(--button-text-color);">
-            СТАТУС: МНОГОПОЛЬЗОВАТЕЛЬСКИЙ РЕЖИМ. СООБЩЕНИЯ ВИДНЫ ВСЕМ.
+            СТАТУС: ЛОКАЛЬНЫЙ РЕЖИМ. СООБЩЕНИЯ ВИДНЫ ТОЛЬКО ВАМ.
         </div>
 
         <div id="forum-content" class="flex flex-col lg:flex-row space-y-6 lg:space-y-0 lg:space-x-6">
             <!-- Левая панель -->
             <div class="w-full lg:w-3/4 flex flex-col">
                 <div id="tab-buttons" class="flex space-x-2 border-b border-gray-700 mb-4" style="border-color: var(--border-color);">
-                    <button data-tab="general" class="tab-button px-4 py-2 rounded-t-md text-sm font-semibold tab-active">Общие</button>
-                    <button data-tab="hacking" class="tab-button px-4 py-2 rounded-t-md text-sm font-semibold hover:bg-gray-700">Взлом</button>
-                    <button data-tab="leaks" class="tab-button px-4 py-2 rounded-t-md text-sm font-semibold hover:bg-gray-700">Утечки</button>
-                    <button data-tab="coding" class="tab-button px-4 py-2 rounded-t-md text-sm font-semibold hover:bg-gray-700"><i class="fas fa-code"></i> Кодинг</button>
-                    <button data-tab="marketplace" class="tab-button px-4 py-2 rounded-t-md text-sm font-semibold hover:bg-gray-700"><i class="fas fa-store"></i> Маркет</button>
+                    <button data-tab="general" class="tab-button px-4 py-2 rounded-t-md text-sm font-semibold tab-active" style="color: var(--text-color);">Общие</button>
+                    <button data-tab="hacking" class="tab-button px-4 py-2 rounded-t-md text-sm font-semibold hover:bg-gray-700" style="color: var(--text-color);">Взлом</button>
+                    <button data-tab="leaks" class="tab-button px-4 py-2 rounded-t-md text-sm font-semibold hover:bg-gray-700" style="color: var(--text-color);">Утечки</button>
+                    <button data-tab="coding" class="tab-button px-4 py-2 rounded-t-md text-sm font-semibold hover:bg-gray-700" style="color: var(--text-color);"><i class="fas fa-code"></i> Кодинг</button>
+                    <button data-tab="marketplace" class="tab-button px-4 py-2 rounded-t-md text-sm font-semibold hover:bg-gray-700" style="color: var(--text-color);"><i class="fas fa-store"></i> Маркет</button>
                 </div>
 
                 <div class="p-4 rounded-md" style="background-color: var(--card-bg);">
@@ -283,21 +316,8 @@
 
                 <div class="p-4 rounded-md" style="background-color: var(--card-bg); border: 1px solid var(--border-color);">
                     <h3 class="text-white font-semibold mb-2" style="color: var(--primary-color);">Недавняя активность</h3>
-                    <div class="space-y-4">
-                        <div class="flex items-center">
-                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2350e3c2' d='M12 2A10 10 0 1 0 12 22A10 10 0 1 0 12 2ZM8 10a4 4 0 1 1 4 4a4 4 0 0 1-4-4Z'/%3E%3C/svg%3E" alt="Аватар" class="user-avatar" style="border-color: var(--border-color);">
-                            <div>
-                                <p class="text-gray-300 text-sm" style="color: #888;">Пример сообщения</p>
-                                <p class="text-gray-500 text-xs" style="color: #555;">4 часа назад</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center">
-                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23f5a623' d='M12 2A10 10 0 1 0 12 22A10 10 0 1 0 12 2Zm0 13a4 4 0 1 1 4-4a4 4 0 0 1-4 4Z'/%3E%3C/svg%3E" alt="Аватар" class="user-avatar" style="border-color: var(--border-color);">
-                            <div>
-                                <p class="text-gray-300 text-sm" style="color: #888;">Ещё одно сообщение</p>
-                                <p class="text-gray-500 text-xs" style="color: #555;">5 часов назад</p>
-                            </div>
-                        </div>
+                    <div id="recent-activity" class="space-y-4">
+                        <!-- Активность будет отображаться здесь -->
                     </div>
                 </div>
             </div>
@@ -309,21 +329,13 @@
         </p>
     </div>
     
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, orderBy, addDoc, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+    <script>
         // Глобальные переменные
-        let db;
-        let auth;
-        let userId;
+        let userId = localStorage.getItem('userId');
         let isAdmin = false;
         let userPoints = 0;
         let userAvatar = '';
         let activeTabId = 'general';
-        let isAuthReady = false;
 
         // Элементы DOM
         const messagesContainer = document.getElementById('messages-container');
@@ -343,6 +355,7 @@
         const linkLogout = document.getElementById('link-logout');
         const themeDropdownBtn = document.getElementById('theme-dropdown-btn');
         const themeDropdown = document.getElementById('theme-dropdown');
+        const recentActivityContainer = document.getElementById('recent-activity');
 
         const ADMIN_PASSWORD = "Muraba1977";
         const ADMIN_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2300ff00' d='M12 1L2 5v6c0 5.55 3.84 10.74 9 12a21.46 21.46 0 0 0 9-12V5L12 1Zm0 1.95 7 3V11c0 4.1-2.9 8.24-7 9.87a21.46 21.46 0 0 1-7-9.87V4.95l7-3Z'/%3E%3C/svg%3E";
@@ -356,67 +369,36 @@
             "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%239b59b6' d='M12 2A10 10 0 1 0 12 22A10 10 0 1 0 12 2Zm0 13.5a1.5 1.5 0 1 1-1.5 1.5a1.5 1.5 0 0 1 1.5-1.5Z'/%3E%3C/svg%3E",
             "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%233498db' d='M12 2A10 10 0 1 0 12 22A10 10 0 1 0 12 2Zm.5 14a.5.5 0 0 1-.5.5h-5.5a.5.5 0 0 1-.5-.5v-4.5a.5.5 0 0 1 .5-.5h5.5a.5.5 0 0 1 .5.5Z'/%3E%3C/svg%3E"
         ];
-
-        // Глобальные переменные Firebase
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
-        // Инициализация Firebase
-        const initFirebase = async () => {
-            if (Object.keys(firebaseConfig).length > 0) {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                setLogLevel('debug'); // Включить логирование Firestore
-
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        await fetchUserProfile(userId);
-                        isAuthReady = true;
-                        updateUI();
-                        // Запустить слушатели после успешной аутентификации
-                        startListeners();
-                    } else {
-                        // Вход в систему анонимно
-                        try {
-                            if (initialAuthToken) {
-                                await signInWithCustomToken(auth, initialAuthToken);
-                            } else {
-                                await signInAnonymously(auth);
-                            }
-                        } catch (error) {
-                            console.error("Ошибка аутентификации:", error);
-                        }
-                    }
-                });
-            } else {
-                console.error("Firebase не настроен. Проверьте конфигурацию.");
+        // Инициализация приложения
+        const init = () => {
+            // Если ID пользователя нет, создаем новый
+            if (!userId) {
+                userId = Math.random().toString(36).substring(2, 15);
+                localStorage.setItem('userId', userId);
             }
-        };
+            
+            // Загружаем профиль пользователя или создаем новый
+            const userProfile = JSON.parse(localStorage.getItem(`userProfile_${userId}`)) || {
+                isAdmin: false,
+                points: 0,
+                avatar: DEFAULT_AVATAR
+            };
+            isAdmin = userProfile.isAdmin;
+            userPoints = userProfile.points;
+            userAvatar = userProfile.avatar;
 
-        const fetchUserProfile = async (uid) => {
-            const userRef = doc(db, `/artifacts/${appId}/users/${uid}/profile/main`);
-            const userSnap = await getDoc(userRef);
-            if (userSnap.exists()) {
-                const data = userSnap.data();
-                isAdmin = data.isAdmin || false;
-                userPoints = data.points || 0;
-                userAvatar = data.avatar || DEFAULT_AVATAR;
-            } else {
-                // Создать новый профиль
-                await setDoc(userRef, {
-                    isAdmin: false,
-                    points: 0,
-                    avatar: DEFAULT_AVATAR
-                });
-                userAvatar = DEFAULT_AVATAR;
-            }
+            // Загружаем сообщения
+            const allMessages = JSON.parse(localStorage.getItem('hackerForumMessages')) || [];
+            
+            // Обновляем UI и отображаем сообщения
+            updateUI();
+            renderMessages(allMessages);
+            setupEventListeners();
         };
 
         const updateUI = () => {
-            userIdDisplay.textContent = `Ваш ID: ${userId || 'Гость'}`;
+            userIdDisplay.textContent = `Ваш ID: ${userId}`;
             userPointsDisplay.textContent = `${userPoints} баллов`;
             currentAvatarPreview.src = userAvatar;
             
@@ -455,18 +437,25 @@
 
         const renderMessages = (messages) => {
             messagesContainer.innerHTML = '';
-            // Проверка, что messages является массивом, чтобы избежать ошибки "Cannot read properties of undefined"
-            if (!messages || !Array.isArray(messages)) {
-                console.error("renderMessages called with invalid messages:", messages);
-                return;
+            recentActivityContainer.innerHTML = '';
+            
+            // Фильтруем сообщения по активной вкладке
+            const filteredMessages = messages.filter(msg => msg.tab === activeTabId);
+            
+            // Сортируем по дате для отображения
+            filteredMessages.sort((a, b) => b.timestamp - a.timestamp);
+
+            if (filteredMessages.length === 0) {
+                messagesContainer.innerHTML = '<p class="text-center text-gray-500 mt-4">Пока нет сообщений в этой категории.</p>';
             }
-            messages.forEach(msg => {
+
+            filteredMessages.forEach(msg => {
                 const messageEl = document.createElement('div');
                 messageEl.className = `message-card p-4 rounded-lg shadow-lg transition-transform transform hover:scale-105 ${msg.isAdmin ? 'pulse-animation' : ''}`;
                 messageEl.dataset.docId = msg.id;
                 messageEl.dataset.userId = msg.userId;
 
-                const date = new Date(msg.timestamp.toDate()).toLocaleString();
+                const date = new Date(msg.timestamp).toLocaleString();
                 const senderName = msg.isAdmin ? 'Админ' : 'Пользователь';
                 const senderAvatar = msg.isAdmin ? ADMIN_AVATAR : msg.userAvatar || DEFAULT_AVATAR;
                 const points = msg.points || 0;
@@ -486,7 +475,7 @@
                         <button class="delete-btn px-3 py-1 text-white text-xs rounded-md hover:bg-red-700 transition-colors" style="background-color: var(--delete-bg);"><i class="fas fa-trash-alt"></i></button>
                     </div>
                     <div class="mt-2 text-right">
-                        <button class="upvote-btn px-3 py-1 text-white text-xs rounded-md hover:bg-green-700 transition-colors">
+                        <button class="upvote-btn px-3 py-1 text-white text-xs rounded-md hover:bg-green-700 transition-colors" style="background-color: var(--upvote-bg); color: var(--button-text-color);">
                             <i class="fas fa-thumbs-up"></i>
                         </button>
                     </div>
@@ -501,6 +490,23 @@
                 messageEl.querySelector('.upvote-btn')?.addEventListener('click', handleUpvote);
 
                 messagesContainer.appendChild(messageEl);
+            });
+
+            // Отображение недавней активности
+            const recentMessages = messages.sort((a, b) => b.timestamp - a.timestamp).slice(0, 5);
+            recentMessages.forEach(msg => {
+                const activityEl = document.createElement('div');
+                activityEl.className = 'flex items-center';
+                const senderAvatar = msg.isAdmin ? ADMIN_AVATAR : msg.userAvatar || DEFAULT_AVATAR;
+                const date = new Date(msg.timestamp).toLocaleString();
+                activityEl.innerHTML = `
+                    <img src="${senderAvatar}" alt="Аватар" class="user-avatar" style="border-color: var(--border-color);">
+                    <div>
+                        <p class="text-gray-300 text-sm" style="color: #888;">${msg.text.substring(0, 20)}...</p>
+                        <p class="text-gray-500 text-xs" style="color: #555;">${date}</p>
+                    </div>
+                `;
+                recentActivityContainer.appendChild(activityEl);
             });
         };
 
@@ -524,11 +530,27 @@
             localStorage.setItem('forumTheme', themeName);
         };
         
-        // Слушатели событий
-        const startListeners = () => {
-            linkLogout.addEventListener('click', async (e) => {
+        // Вспомогательная функция для отображения модального окна
+        const showModal = (message, isError = false) => {
+            const modalEl = document.createElement('div');
+            modalEl.className = 'modal';
+            modalEl.innerHTML = `
+                <div class="modal-content">
+                    <p class="modal-message">${message}</p>
+                    <button class="modal-button" style="${isError ? 'background-color: var(--delete-bg);' : ''}">OK</button>
+                </div>
+            `;
+            document.body.appendChild(modalEl);
+            modalEl.querySelector('.modal-button').addEventListener('click', () => {
+                modalEl.remove();
+            });
+        };
+
+        const setupEventListeners = () => {
+            linkLogout.addEventListener('click', (e) => {
                 e.preventDefault();
-                await auth.signOut();
+                localStorage.removeItem('userId');
+                localStorage.removeItem(`userProfile_${userId}`);
                 window.location.reload();
             });
             
@@ -552,148 +574,120 @@
                 }
             });
 
-
             tabButtonsContainer.addEventListener('click', (e) => {
                 const tab = e.target.closest('.tab-button');
                 if (tab) {
                     activeTabId = tab.dataset.tab;
                     updateTabButtons();
-                    setupFirestoreListener();
+                    const allMessages = JSON.parse(localStorage.getItem('hackerForumMessages')) || [];
+                    renderMessages(allMessages);
                 }
             });
 
-            newForm.addEventListener('submit', async (e) => {
+            newForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                if (!isAuthReady) return;
-
                 const text = messageTextarea.value.trim();
                 if (text) {
-                    const messagesRef = collection(db, `/artifacts/${appId}/public/data/messages`);
-                    await addDoc(messagesRef, {
+                    const allMessages = JSON.parse(localStorage.getItem('hackerForumMessages')) || [];
+                    const newMessage = {
+                        id: Date.now(),
                         text,
-                        timestamp: new Date(),
+                        timestamp: Date.now(),
                         isAdmin: isAdmin,
                         userId: userId,
                         userAvatar: userAvatar,
                         points: 0,
-                        tab: activeTabId
-                    });
+                        tab: activeTabId,
+                        upvotedBy: []
+                    };
+                    allMessages.push(newMessage);
+                    localStorage.setItem('hackerForumMessages', JSON.stringify(allMessages));
                     messageTextarea.value = '';
+                    renderMessages(allMessages);
                 }
             });
             
-            avatarSelection.addEventListener('click', async (e) => {
-                if (!isAuthReady) return;
+            avatarSelection.addEventListener('click', (e) => {
                 if (e.target.classList.contains('avatar-option')) {
                     if (userPoints > 0 || isAdmin) {
                         userAvatar = e.target.dataset.url;
-                        const userRef = doc(db, `/artifacts/${appId}/users/${userId}/profile/main`);
-                        await updateDoc(userRef, { avatar: userAvatar });
+                        const userProfile = JSON.parse(localStorage.getItem(`userProfile_${userId}`)) || {};
+                        userProfile.avatar = userAvatar;
+                        localStorage.setItem(`userProfile_${userId}`, JSON.stringify(userProfile));
                         updateUI();
+                        // Re-render messages to show new avatar
+                        const allMessages = JSON.parse(localStorage.getItem('hackerForumMessages')) || [];
+                        renderMessages(allMessages);
                     } else {
-                        const modal = document.createElement('div');
-                        modal.innerHTML = `
-                            <div class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-                                <div class="bg-gray-800 p-8 rounded-lg border border-gray-700 text-white max-w-sm text-center">
-                                    <p class="mb-4">Наберите 1 балл, чтобы выбрать аватар!</p>
-                                    <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 bg-green-600 rounded-md">OK</button>
-                                </div>
-                            </div>
-                        `;
-                        document.body.appendChild(modal);
+                        showModal("Наберите 1 балл, чтобы выбрать аватар!", true);
                     }
                 }
             });
 
-            adminLoginBtn.addEventListener('click', async () => {
-                if (!isAuthReady) return;
+            adminLoginBtn.addEventListener('click', () => {
                 const password = adminPassInput.value.trim();
                 if (password === ADMIN_PASSWORD) {
                     isAdmin = true;
                     userAvatar = ADMIN_AVATAR;
-                    const userRef = doc(db, `/artifacts/${appId}/users/${userId}/profile/main`);
-                    await setDoc(userRef, { isAdmin: true, avatar: userAvatar, points: userPoints });
+                    const userProfile = JSON.parse(localStorage.getItem(`userProfile_${userId}`)) || {};
+                    userProfile.isAdmin = true;
+                    userProfile.avatar = userAvatar;
+                    localStorage.setItem(`userProfile_${userId}`, JSON.stringify(userProfile));
                     updateUI();
-                    const modal = document.createElement('div');
-                    modal.innerHTML = `
-                        <div class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-                            <div class="bg-gray-800 p-8 rounded-lg border border-gray-700 text-white max-w-sm text-center">
-                                <p class="mb-4">Вход в систему администратора выполнен успешно.</p>
-                                <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 bg-green-600 rounded-md">OK</button>
-                            </div>
-                        </div>
-                    `;
-                    document.body.appendChild(modal);
+                    showModal("Вход в систему администратора выполнен успешно.");
                 } else {
-                    const modal = document.createElement('div');
-                    modal.innerHTML = `
-                        <div class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-                            <div class="bg-gray-800 p-8 rounded-lg border border-gray-700 text-white max-w-sm text-center">
-                                <p class="mb-4">Неверный пароль администратора.</p>
-                                <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 bg-red-600 rounded-md">OK</button>
-                            </div>
-                        </div>
-                    `;
-                    document.body.appendChild(modal);
+                    showModal("Неверный пароль администратора.", true);
                 }
             });
-            setupFirestoreListener();
-        };
-
-        const setupFirestoreListener = () => {
-            if (!db || !isAuthReady) return;
-            const q = query(
-                collection(db, `/artifacts/${appId}/public/data/messages`),
-                // orderBy("timestamp", "desc") // orderBy requires an index which we cannot create here
-            );
-            onSnapshot(q, (snapshot) => {
-                const messages = [];
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    if (data.tab === activeTabId) {
-                         messages.push({ ...data, id: doc.id });
-                    }
-                });
-                messages.sort((a, b) => b.timestamp.toMillis() - a.timestamp.toMillis());
-                renderMessages(messages);
-            });
         };
         
-        const handleDeleteMessage = async (e) => {
-            if (!isAdmin || !isAuthReady) return;
-            const docId = e.target.closest('.message-card').dataset.docId;
-            const messageRef = doc(db, `/artifacts/${appId}/public/data/messages`, docId);
-            await deleteDoc(messageRef);
+        const handleDeleteMessage = (e) => {
+            if (!isAdmin) return;
+            const docId = parseInt(e.target.closest('.message-card').dataset.docId);
+            const allMessages = JSON.parse(localStorage.getItem('hackerForumMessages')) || [];
+            const newMessages = allMessages.filter(msg => msg.id !== docId);
+            localStorage.setItem('hackerForumMessages', JSON.stringify(newMessages));
+            renderMessages(newMessages);
         };
 
-        const handleAdminAddPoints = async (e) => {
-            if (!isAdmin || !isAuthReady) return;
+        const handleAdminAddPoints = (e) => {
+            if (!isAdmin) return;
             const targetUserId = e.target.dataset.userId;
-            const userRef = doc(db, `/artifacts/${appId}/users/${targetUserId}/profile/main`);
-            const userSnap = await getDoc(userRef);
-            if (userSnap.exists()) {
-                const currentPoints = userSnap.data().points || 0;
-                await updateDoc(userRef, { points: currentPoints + 1 });
+            const userProfile = JSON.parse(localStorage.getItem(`userProfile_${targetUserId}`));
+            if (userProfile) {
+                userProfile.points = (userProfile.points || 0) + 1;
+                localStorage.setItem(`userProfile_${targetUserId}`, JSON.stringify(userProfile));
+                updateUI();
             }
         };
 
-        const handleUpvote = async (e) => {
-            if (!isAuthReady) return;
-            const docId = e.target.closest('.message-card').dataset.docId;
-            const messageRef = doc(db, `/artifacts/${appId}/public/data/messages`, docId);
-            const messageSnap = await getDoc(messageRef);
-            if (messageSnap.exists()) {
-                const currentPoints = messageSnap.data().points || 0;
-                await updateDoc(messageRef, { points: currentPoints + 1 });
-            }
+        const handleUpvote = (e) => {
+            const docId = parseInt(e.target.closest('.message-card').dataset.docId);
+            let allMessages = JSON.parse(localStorage.getItem('hackerForumMessages')) || [];
+            
+            allMessages = allMessages.map(msg => {
+                if (msg.id === docId) {
+                    msg.upvotedBy = msg.upvotedBy || [];
+                    if (!msg.upvotedBy.includes(userId)) {
+                        msg.points = (msg.points || 0) + 1;
+                        msg.upvotedBy.push(userId);
+                    } else {
+                        showModal("Вы уже голосовали за это сообщение.", true);
+                    }
+                }
+                return msg;
+            });
+            
+            localStorage.setItem('hackerForumMessages', JSON.stringify(allMessages));
+            renderMessages(allMessages);
         };
-        
+
         window.onload = () => {
             const savedTheme = localStorage.getItem('forumTheme');
             if (savedTheme) {
                 setTheme(savedTheme);
             }
-            initFirebase();
+            init();
         };
     </script>
 </body>
