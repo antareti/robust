@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форум доброго хакера</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Fira+Code:wght@400;700&family=Anonymous+Pro&family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #00ff00;
+            --secondary-color: #ff00ff;
+            --text-color: #fff;
+            --background-color: #0a0a0a;
+            --header-bg: #111111;
+            --card-bg: #161616;
+            --border-color: #00ff00;
+            --tab-active-bg: #1c1c1c;
+            --button-text-color: #1a1a1a;
+            --upvote-bg: #00ff00;
+            --delete-bg: #ff0000;
+        }
+
+        .theme-cyber-purple {
+            --primary-color: #bd10e0;
+            --secondary-color: #4a90e2;
+            --text-color: #fff;
+            --background-color: #0a0a0a;
+            --header-bg: #111111;
+            --card-bg: #161616;
+            --border-color: #bd10e0;
+            --tab-active-bg: #1c1c1c;
+            --button-text-color: #1a1a1a;
+            --upvote-bg: #bd10e0;
+            --delete-bg: #ff0000;
+        }
+
+        .theme-sunset-orange {
+            --primary-color: #f5a623;
+            --secondary-color: #b8006f;
+            --text-color: #fff;
+            --background-color: #0a0a0a;
+            --header-bg: #111111;
+            --card-bg: #161616;
+            --border-color: #f5a623;
+            --tab-active-bg: #1c1c1c;
+            --button-text-color: #1a1a1a;
+            --upvote-bg: #f5a623;
+            --delete-bg: #ff0000;
+        }
+
+        .theme-deep-steak {
+            --primary-color: #800000; /* Глубокий бордовый */
+            --secondary-color: #ff4500; /* Огненно-оранжевый для эффекта глитча */
+            --text-color: #f5f5dc; /* Бежевый */
+            --background-color: #121212; /* Очень темный серый */
+            --header-bg: #0d0d0d;
+            --card-bg: #2b1b17; /* Темно-коричневый */
+            --border-color: #800000;
+            --tab-active-bg: #331a1a;
+            --button-text-color: #f5f5dc;
+            --upvote-bg: #800000;
+            --delete-bg: #dc143c; /* Темно-красный */
+        }
+
+        body {
+            font-family: 'Source Code Pro', monospace;
+            background-color: var(--background-color);
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+        }
+        .header-bg {
+            background-color: var(--header-bg);
+            border-bottom: 2px solid #222222;
+        }
+        .main-container {
+            max-width: 1200px;
+        }
+        .section-header {
+            background-color: #1c1c1c;
+            color: var(--primary-color);
+            border-bottom: 1px solid #3a3a3a;
+        }
+        .sidebar {
+            background-color: #111111;
+            border-left: 2px solid #222222;
+        }
+        .green-accent {
+            color: var(--primary-color);
+        }
+        .tab-active {
+            background-color: var(--tab-active-bg);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        .message-card {
+            background-color: var(--card-bg);
+            border: 1px solid #282828;
+            border-left: 3px solid var(--primary-color);
+            color: var(--text-color);
+        }
+        .admin-controls {
+            display: none;
+        }
+        .is-admin .admin-controls {
+            display: flex;
+        }
+        .pulse-animation {
+            animation: pulse-border 1.5s infinite;
+        }
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 var(--primary-color); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 0, 0); }
+            100% { box-shadow: 0 0 0 0 var(--primary-color); }
+        }
+        .avatar-container {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            justify-items: center;
+        }
+        .avatar-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            background-size: cover;
+        }
+        .avatar-option:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 8px var(--primary-color);
+        }
+        .avatar-option.selected {
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 0 8px var(--primary-color);
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 8px;
+            object-fit: cover;
+            border: 1px solid #3a3a3a;
+        }
+        .upvote-btn {
+            background-color: var(--upvote-bg);
+            color: var(--button-text-color);
+        }
+        .upvote-btn:hover {
+            background-color: #00c700;
+        }
+        .vt323 {
+            font-family: 'VT323', monospace;
+        }
+        .glitch-text {
+            animation: glitch 1.5s infinite;
+            text-shadow: 
+                -1px 0 var(--secondary-color), 
+                1px 0 var(--primary-color);
+        }
+        @keyframes glitch {
+            0% { text-shadow: -1px -1px var(--secondary-color), 1px 1px var(--primary-color); }
+            10% { text-shadow: 1px 1px var(--secondary-color), -1px -1px var(--primary-color); }
+            20% { text-shadow: -1px 1px var(--secondary-color), 1px -1px var(--primary-color); }
+            30% { text-shadow: 1px -1px var(--secondary-color), -1px 1px var(--primary-color); }
+            40% { text-shadow: -1px 0 var(--secondary-color), 1px 0 var(--primary-color); }
+            50% { text-shadow: 1px 0 var(--secondary-color), -1px 0 var(--primary-color); }
+            60% { text-shadow: -1px 0 var(--secondary-color), 1px 0 var(--primary-color); }
+            70% { text-shadow: 1px 0 var(--secondary-color), -1px 0 var(--primary-color); }
+            80% { text-shadow: -1px 0 var(--secondary-color), 1px 0 var(--primary-color); }
+            90% { text-shadow: 1px 0 var(--secondary-color), -1px 0 var(--primary-color); }
+            100% { text-shadow: -1px -1px var(--secondary-color), 1px 1px var(--primary-color); }
+        }
+        .blink-animation {
+            animation: blinker 1.5s infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+        .hidden {
+            display: none;
+        }
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+        }
+        input, textarea, button {
+            transition: all 0.3s ease;
+        }
+        input:focus, textarea:focus {
+            outline-color: var(--primary-color);
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+        .message-card .text-gray-500 {
+            color: #888;
+        }
+        .message-card .text-gray-400 {
+            color: #888;
+        }
+        .message-card .text-white {
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-300 theme-hacker-green">
+    <div class="header-bg py-4 mb-4">
+        <div class="main-container mx-auto flex justify-between items-center px-4">
+            <div id="forum-title" class="text-3xl font-bold vt323 text-gray-50 glitch-text">Форум доброго хакера</div>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <button id="theme-dropdown-btn" class="px-3 py-1 text-sm rounded-md bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-palette"></i> Тема
+                    </button>
+                    <div id="theme-dropdown" class="absolute right-0 mt-2 py-2 w-40 bg-gray-800 rounded-md shadow-lg z-10 hidden" style="border: 1px solid var(--border-color);">
+                        <a href="#" data-theme="hacker-green" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors">Зеленый хакер</a>
+                        <a href="#" data-theme="cyber-purple" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors">Кибер-фиолетовый</a>
+                        <a href="#" data-theme="sunset-orange" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors">Оранжевый закат</a>
+                        <a href="#" data-theme="deep-steak" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors">Глубокий стейк</a>
+                    </div>
+                </div>
+                <nav id="auth-links">
+                    <a href="#" id="link-logout" class="text-gray-400 hover:text-white mx-2"><i class="fas fa-sign-out-alt"></i> Выход</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-container mx-auto px-4">
+        <div class="bg-green-600 text-white font-bold p-3 text-center rounded-md mb-6 glitch-text" style="background-color: var(--primary-color); color: var(--button-text-color);">
+            СТАТУС: МНОГОПОЛЬЗОВАТЕЛЬСКИЙ РЕЖИМ. СООБЩЕНИЯ ВИДНЫ ВСЕМ.
+        </div>
+
+        <div id="forum-content" class="flex flex-col lg:flex-row space-y-6 lg:space-y-0 lg:space-x-6">
+            <!-- Левая панель -->
+            <div class="w-full lg:w-3/4 flex flex-col">
+                <div id="tab-buttons" class="flex space-x-2 border-b border-gray-700 mb-4" style="border-color: var(--border-color);">
+                    <button data-tab="general" class="tab-button px-4 py-2 rounded-t-md text-sm font-semibold tab-active">Общие</button>
+                    <button data-tab="hacking" class="tab-button px-4 py-2 rounded-t-md text-sm font-semibold hover:bg-gray-700">Взлом</button>
+                    <button data-tab="leaks" class="tab-button px-4 py-2 rounded-t-md text-sm font-semibold hover:bg-gray-700">Утечки</button>
+                    <button data-tab="coding" class="tab-button px-4 py-2 rounded-t-md text-sm font-semibold hover:bg-gray-700"><i class="fas fa-code"></i> Кодинг</button>
+                    <button data-tab="marketplace" class="tab-button px-4 py-2 rounded-t-md text-sm font-semibold hover:bg-gray-700"><i class="fas fa-store"></i> Маркет</button>
+                </div>
+
+                <div class="p-4 rounded-md" style="background-color: var(--card-bg);">
+                    <h2 id="section-title" class="text-white text-lg font-semibold mb-4 glitch-text" style="color: var(--primary-color);">Общие</h2>
+                    
+                    <div id="messages-container" class="space-y-4 mb-6">
+                        <!-- Сообщения будут добавлены сюда -->
+                    </div>
+
+                    <form id="new-message-form" class="p-6 rounded-lg shadow-md" style="background-color: var(--card-bg); border: 1px solid var(--border-color);">
+                        <h2 class="text-xl font-semibold mb-4 text-white glitch-text" style="color: var(--primary-color);">Новое сообщение</h2>
+                        <div class="mb-4">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <img id="current-avatar-preview" class="user-avatar" src="" alt="Аватар" style="border-color: var(--border-color);">
+                                <span id="avatar-status-message" class="text-sm text-gray-400" style="color: #888;"></span>
+                            </div>
+                            <div id="avatar-selection" class="avatar-container mt-2 opacity-50 pointer-events-none">
+                                <!-- Аватары будут добавлены здесь -->
+                            </div>
+                        </div>
+                        <textarea id="message-text" rows="4" class="w-full p-3 rounded-lg bg-gray-900 border text-white focus:outline-none focus:ring-2 resize-none mb-4" placeholder="Введите ваше сообщение..." style="background-color: var(--background-color); border-color: var(--border-color); color: var(--primary-color);"></textarea>
+                        <button type="submit" class="w-full px-4 py-3 rounded-lg font-bold transition-colors" style="background-color: var(--primary-color); color: var(--button-text-color);">Отправить</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Правый сайдбар -->
+            <div class="w-full lg:w-1/4 space-y-4">
+                <div class="p-4 rounded-md" style="background-color: var(--card-bg); border: 1px solid var(--border-color);">
+                    <p id="admin-status" class="text-sm font-semibold text-gray-400 text-center mb-2" style="color: #888;">Статус: Обычный пользователь</p>
+                    <div class="flex items-center space-x-2 justify-center mb-4">
+                        <input type="password" id="admin-pass" placeholder="Пароль админа" class="p-2 rounded-md bg-gray-900 border text-white focus:outline-none focus:ring-2 w-1/2" style="background-color: var(--background-color); border-color: var(--border-color); color: var(--primary-color);">
+                        <button id="admin-login-btn" class="px-4 py-2 text-white rounded-md hover:bg-red-700 transition-colors w-1/2" style="background-color: var(--delete-bg); color: var(--button-text-color);">Войти</button>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-md" style="background-color: var(--card-bg); border: 1px solid var(--border-color);">
+                    <h3 class="text-white font-semibold mb-2" style="color: var(--primary-color);">Недавняя активность</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2350e3c2' d='M12 2A10 10 0 1 0 12 22A10 10 0 1 0 12 2ZM8 10a4 4 0 1 1 4 4a4 4 0 0 1-4-4Z'/%3E%3C/svg%3E" alt="Аватар" class="user-avatar" style="border-color: var(--border-color);">
+                            <div>
+                                <p class="text-gray-300 text-sm" style="color: #888;">Пример сообщения</p>
+                                <p class="text-gray-500 text-xs" style="color: #555;">4 часа назад</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23f5a623' d='M12 2A10 10 0 1 0 12 22A10 10 0 1 0 12 2Zm0 13a4 4 0 1 1 4-4a4 4 0 0 1-4 4Z'/%3E%3C/svg%3E" alt="Аватар" class="user-avatar" style="border-color: var(--border-color);">
+                            <div>
+                                <p class="text-gray-300 text-sm" style="color: #888;">Ещё одно сообщение</p>
+                                <p class="text-gray-500 text-xs" style="color: #555;">5 часов назад</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p id="user-info" class="text-sm font-bold text-gray-400 mt-6 text-center" style="color: var(--primary-color);">
+            <span id="user-id-display">Ваш ID: Гость</span> | 
+            <span id="user-points-display">0 баллов</span>
+        </p>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, orderBy, addDoc, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Глобальные переменные
+        let db;
+        let auth;
+        let userId;
+        let isAdmin = false;
+        let userPoints = 0;
+        let userAvatar = '';
+        let activeTabId = 'general';
+        let isAuthReady = false;
+
+        // Элементы DOM
+        const messagesContainer = document.getElementById('messages-container');
+        const newForm = document.getElementById('new-message-form');
+        const messageTextarea = document.getElementById('message-text');
+        const sectionTitle = document.getElementById('section-title');
+        const tabButtonsContainer = document.getElementById('tab-buttons');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const adminLoginBtn = document.getElementById('admin-login-btn');
+        const adminPassInput = document.getElementById('admin-pass');
+        const adminStatus = document.getElementById('admin-status');
+        const avatarSelection = document.getElementById('avatar-selection');
+        const currentAvatarPreview = document.getElementById('current-avatar-preview');
+        const avatarStatusMessage = document.getElementById('avatar-status-message');
+        const userIdDisplay = document.getElementById('user-id-display');
+        const userPointsDisplay = document.getElementById('user-points-display');
+        const linkLogout = document.getElementById('link-logout');
+        const themeDropdownBtn = document.getElementById('theme-dropdown-btn');
+        const themeDropdown = document.getElementById('theme-dropdown');
+
+        const ADMIN_PASSWORD = "Muraba1977";
+        const ADMIN_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2300ff00' d='M12 1L2 5v6c0 5.55 3.84 10.74 9 12a21.46 21.46 0 0 0 9-12V5L12 1Zm0 1.95 7 3V11c0 4.1-2.9 8.24-7 9.87a21.46 21.46 0 0 1-7-9.87V4.95l7-3Z'/%3E%3C/svg%3E";
+        const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ccc' d='M12 2A10 10 0 1 0 12 22A10 10 0 1 0 12 2Zm0 3.75a3 3 0 1 1-3 3A3 3 0 0 1 12 5.75ZM12 20.5a8.5 8.5 0 0 1-6.19-2.5A6.5 6.5 0 0 1 12 14.5a6.5 6.5 0 0 1 6.19 3.5A8.5 8.5 0 0 1 12 20.5Z'/%3E%3C/svg%3E";
+        
+        const AVATARS = [
+            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%234a90e2' d='M12 2A10 10 0 1 0 12 22A10 10 0 1 0 12 2ZM6.3 16.8c.8-.4 1.7-.5 2.8-.5a6 6 0 0 1 5.8 4.6l-8.6-4.1Z'/%3E%3C/svg%3E",
+            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2350e3c2' d='M12 2A10 10 0 1 0 12 22A10 10 0 1 0 12 2ZM8 10a4 4 0 1 1 4 4a4 4 0 0 1-4-4Z'/%3E%3C/svg%3E",
+            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23f5a623' d='M12 2A10 10 0 1 0 12 22A10 10 0 1 0 12 2Zm0 13a4 4 0 1 1 4-4a4 4 0 0 1-4 4Z'/%3E%3C/svg%3E",
+            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23bd10e0' d='M12 2A10 10 0 1 0 12 22A10 10 0 1 0 12 2Zm-4 5v10l8-5l-8-5Z'/%3E%3C/svg%3E",
+            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%239b59b6' d='M12 2A10 10 0 1 0 12 22A10 10 0 1 0 12 2Zm0 13.5a1.5 1.5 0 1 1-1.5 1.5a1.5 1.5 0 0 1 1.5-1.5Z'/%3E%3C/svg%3E",
+            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%233498db' d='M12 2A10 10 0 1 0 12 22A10 10 0 1 0 12 2Zm.5 14a.5.5 0 0 1-.5.5h-5.5a.5.5 0 0 1-.5-.5v-4.5a.5.5 0 0 1 .5-.5h5.5a.5.5 0 0 1 .5.5Z'/%3E%3C/svg%3E"
+        ];
+
+        // Глобальные переменные Firebase
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        // Инициализация Firebase
+        const initFirebase = async () => {
+            if (Object.keys(firebaseConfig).length > 0) {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('debug'); // Включить логирование Firestore
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        await fetchUserProfile(userId);
+                        isAuthReady = true;
+                        updateUI();
+                        // Запустить слушатели после успешной аутентификации
+                        startListeners();
+                    } else {
+                        // Вход в систему анонимно
+                        try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } catch (error) {
+                            console.error("Ошибка аутентификации:", error);
+                        }
+                    }
+                });
+            } else {
+                console.error("Firebase не настроен. Проверьте конфигурацию.");
+            }
+        };
+
+        const fetchUserProfile = async (uid) => {
+            const userRef = doc(db, `/artifacts/${appId}/users/${uid}/profile/main`);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+                const data = userSnap.data();
+                isAdmin = data.isAdmin || false;
+                userPoints = data.points || 0;
+                userAvatar = data.avatar || DEFAULT_AVATAR;
+            } else {
+                // Создать новый профиль
+                await setDoc(userRef, {
+                    isAdmin: false,
+                    points: 0,
+                    avatar: DEFAULT_AVATAR
+                });
+                userAvatar = DEFAULT_AVATAR;
+            }
+        };
+
+        const updateUI = () => {
+            userIdDisplay.textContent = `Ваш ID: ${userId || 'Гость'}`;
+            userPointsDisplay.textContent = `${userPoints} баллов`;
+            currentAvatarPreview.src = userAvatar;
+            
+            if (userPoints > 0 || isAdmin) {
+                avatarSelection.classList.remove('opacity-50', 'pointer-events-none');
+                avatarStatusMessage.textContent = 'Выбирайте аватар';
+            } else {
+                avatarSelection.classList.add('opacity-50', 'pointer-events-none');
+                avatarStatusMessage.textContent = 'Наберите 1 балл, чтобы выбрать аватар.';
+            }
+            
+            updateAvatarSelectionUI();
+            updateTabButtons();
+            
+            if (isAdmin) {
+                document.body.classList.add('is-admin');
+                adminStatus.textContent = 'Статус: Администратор';
+                adminStatus.className = 'text-sm font-semibold text-green-500 text-center mb-2';
+            } else {
+                document.body.classList.remove('is-admin');
+                adminStatus.textContent = 'Статус: Обычный пользователь';
+                adminStatus.className = 'text-sm font-semibold text-gray-400 text-center mb-2';
+            }
+        };
+
+        const updateTabButtons = () => {
+            tabButtons.forEach(button => {
+                if (button.dataset.tab === activeTabId) {
+                    button.classList.add('tab-active');
+                } else {
+                    button.classList.remove('tab-active');
+                }
+            });
+            sectionTitle.textContent = activeTabId.charAt(0).toUpperCase() + activeTabId.slice(1);
+        };
+
+        const renderMessages = (messages) => {
+            messagesContainer.innerHTML = '';
+            // Проверка, что messages является массивом, чтобы избежать ошибки "Cannot read properties of undefined"
+            if (!messages || !Array.isArray(messages)) {
+                console.error("renderMessages called with invalid messages:", messages);
+                return;
+            }
+            messages.forEach(msg => {
+                const messageEl = document.createElement('div');
+                messageEl.className = `message-card p-4 rounded-lg shadow-lg transition-transform transform hover:scale-105 ${msg.isAdmin ? 'pulse-animation' : ''}`;
+                messageEl.dataset.docId = msg.id;
+                messageEl.dataset.userId = msg.userId;
+
+                const date = new Date(msg.timestamp.toDate()).toLocaleString();
+                const senderName = msg.isAdmin ? 'Админ' : 'Пользователь';
+                const senderAvatar = msg.isAdmin ? ADMIN_AVATAR : msg.userAvatar || DEFAULT_AVATAR;
+                const points = msg.points || 0;
+                
+                messageEl.innerHTML = `
+                    <div class="flex justify-between items-center mb-2" style="color: var(--primary-color);">
+                        <div class="flex items-center text-sm font-semibold text-gray-500">
+                            <img src="${senderAvatar}" alt="Аватар" class="user-avatar" style="border-color: var(--border-color);">
+                            <span class="vt323">${senderName}</span>
+                            <span class="text-gray-400 ml-2">(${points} балл(ов))</span>
+                        </div>
+                        <div class="text-xs text-gray-500" style="color: #888;">${date}</div>
+                    </div>
+                    <p class="text-white text-lg" style="color: var(--text-color);">${msg.text}</p>
+                    <div class="admin-controls mt-2 space-x-2 justify-end">
+                        <button class="add-points-btn px-3 py-1 text-white text-xs rounded-md hover:bg-green-700 transition-colors" style="background-color: var(--primary-color); color: var(--button-text-color);" data-user-id="${msg.userId}">+1 Балл</button>
+                        <button class="delete-btn px-3 py-1 text-white text-xs rounded-md hover:bg-red-700 transition-colors" style="background-color: var(--delete-bg);"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                    <div class="mt-2 text-right">
+                        <button class="upvote-btn px-3 py-1 text-white text-xs rounded-md hover:bg-green-700 transition-colors">
+                            <i class="fas fa-thumbs-up"></i>
+                        </button>
+                    </div>
+                `;
+
+                if (isAdmin) {
+                    messageEl.classList.add('is-admin');
+                }
+
+                messageEl.querySelector('.delete-btn')?.addEventListener('click', handleDeleteMessage);
+                messageEl.querySelector('.add-points-btn')?.addEventListener('click', handleAdminAddPoints);
+                messageEl.querySelector('.upvote-btn')?.addEventListener('click', handleUpvote);
+
+                messagesContainer.appendChild(messageEl);
+            });
+        };
+
+        const updateAvatarSelectionUI = () => {
+            avatarSelection.innerHTML = '';
+            AVATARS.forEach(avatarUrl => {
+                const img = document.createElement('img');
+                img.src = avatarUrl;
+                img.className = 'avatar-option';
+                img.dataset.url = avatarUrl;
+                if (userAvatar === avatarUrl) {
+                    img.classList.add('selected');
+                }
+                avatarSelection.appendChild(img);
+            });
+        };
+        
+        const setTheme = (themeName) => {
+            document.body.className = '';
+            document.body.classList.add(`theme-${themeName}`);
+            localStorage.setItem('forumTheme', themeName);
+        };
+        
+        // Слушатели событий
+        const startListeners = () => {
+            linkLogout.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await auth.signOut();
+                window.location.reload();
+            });
+            
+            themeDropdownBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                themeDropdown.classList.toggle('hidden');
+            });
+
+            themeDropdown.addEventListener('click', (e) => {
+                e.preventDefault();
+                const theme = e.target.dataset.theme;
+                if (theme) {
+                    setTheme(theme);
+                    themeDropdown.classList.add('hidden');
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!themeDropdownBtn.contains(e.target) && !themeDropdown.contains(e.target)) {
+                    themeDropdown.classList.add('hidden');
+                }
+            });
+
+
+            tabButtonsContainer.addEventListener('click', (e) => {
+                const tab = e.target.closest('.tab-button');
+                if (tab) {
+                    activeTabId = tab.dataset.tab;
+                    updateTabButtons();
+                    setupFirestoreListener();
+                }
+            });
+
+            newForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!isAuthReady) return;
+
+                const text = messageTextarea.value.trim();
+                if (text) {
+                    const messagesRef = collection(db, `/artifacts/${appId}/public/data/messages`);
+                    await addDoc(messagesRef, {
+                        text,
+                        timestamp: new Date(),
+                        isAdmin: isAdmin,
+                        userId: userId,
+                        userAvatar: userAvatar,
+                        points: 0,
+                        tab: activeTabId
+                    });
+                    messageTextarea.value = '';
+                }
+            });
+            
+            avatarSelection.addEventListener('click', async (e) => {
+                if (!isAuthReady) return;
+                if (e.target.classList.contains('avatar-option')) {
+                    if (userPoints > 0 || isAdmin) {
+                        userAvatar = e.target.dataset.url;
+                        const userRef = doc(db, `/artifacts/${appId}/users/${userId}/profile/main`);
+                        await updateDoc(userRef, { avatar: userAvatar });
+                        updateUI();
+                    } else {
+                        const modal = document.createElement('div');
+                        modal.innerHTML = `
+                            <div class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                                <div class="bg-gray-800 p-8 rounded-lg border border-gray-700 text-white max-w-sm text-center">
+                                    <p class="mb-4">Наберите 1 балл, чтобы выбрать аватар!</p>
+                                    <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 bg-green-600 rounded-md">OK</button>
+                                </div>
+                            </div>
+                        `;
+                        document.body.appendChild(modal);
+                    }
+                }
+            });
+
+            adminLoginBtn.addEventListener('click', async () => {
+                if (!isAuthReady) return;
+                const password = adminPassInput.value.trim();
+                if (password === ADMIN_PASSWORD) {
+                    isAdmin = true;
+                    userAvatar = ADMIN_AVATAR;
+                    const userRef = doc(db, `/artifacts/${appId}/users/${userId}/profile/main`);
+                    await setDoc(userRef, { isAdmin: true, avatar: userAvatar, points: userPoints });
+                    updateUI();
+                    const modal = document.createElement('div');
+                    modal.innerHTML = `
+                        <div class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                            <div class="bg-gray-800 p-8 rounded-lg border border-gray-700 text-white max-w-sm text-center">
+                                <p class="mb-4">Вход в систему администратора выполнен успешно.</p>
+                                <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 bg-green-600 rounded-md">OK</button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+                } else {
+                    const modal = document.createElement('div');
+                    modal.innerHTML = `
+                        <div class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                            <div class="bg-gray-800 p-8 rounded-lg border border-gray-700 text-white max-w-sm text-center">
+                                <p class="mb-4">Неверный пароль администратора.</p>
+                                <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 bg-red-600 rounded-md">OK</button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+                }
+            });
+            setupFirestoreListener();
+        };
+
+        const setupFirestoreListener = () => {
+            if (!db || !isAuthReady) return;
+            const q = query(
+                collection(db, `/artifacts/${appId}/public/data/messages`),
+                // orderBy("timestamp", "desc") // orderBy requires an index which we cannot create here
+            );
+            onSnapshot(q, (snapshot) => {
+                const messages = [];
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.tab === activeTabId) {
+                         messages.push({ ...data, id: doc.id });
+                    }
+                });
+                messages.sort((a, b) => b.timestamp.toMillis() - a.timestamp.toMillis());
+                renderMessages(messages);
+            });
+        };
+        
+        const handleDeleteMessage = async (e) => {
+            if (!isAdmin || !isAuthReady) return;
+            const docId = e.target.closest('.message-card').dataset.docId;
+            const messageRef = doc(db, `/artifacts/${appId}/public/data/messages`, docId);
+            await deleteDoc(messageRef);
+        };
+
+        const handleAdminAddPoints = async (e) => {
+            if (!isAdmin || !isAuthReady) return;
+            const targetUserId = e.target.dataset.userId;
+            const userRef = doc(db, `/artifacts/${appId}/users/${targetUserId}/profile/main`);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+                const currentPoints = userSnap.data().points || 0;
+                await updateDoc(userRef, { points: currentPoints + 1 });
+            }
+        };
+
+        const handleUpvote = async (e) => {
+            if (!isAuthReady) return;
+            const docId = e.target.closest('.message-card').dataset.docId;
+            const messageRef = doc(db, `/artifacts/${appId}/public/data/messages`, docId);
+            const messageSnap = await getDoc(messageRef);
+            if (messageSnap.exists()) {
+                const currentPoints = messageSnap.data().points || 0;
+                await updateDoc(messageRef, { points: currentPoints + 1 });
+            }
+        };
+        
+        window.onload = () => {
+            const savedTheme = localStorage.getItem('forumTheme');
+            if (savedTheme) {
+                setTheme(savedTheme);
+            }
+            initFirebase();
+        };
+    </script>
+</body>
+</html>
