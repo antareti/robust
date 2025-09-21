@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
-/* твои стили полностью без изменений */
+/* стили без изменений */
 body { font-family: 'Inter', sans-serif; background-color: #1a1a1a; color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
 .chat-container { display: flex; flex-direction: column; width: 100%; max-width: 1000px; background-color: #2d2d2d; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); overflow: hidden; border: 1px solid #444; }
 .video-streams { display: flex; flex-direction: column; flex-wrap: wrap; padding: 15px; gap: 15px; background-color: #1e1e1e; justify-content: center; align-items: center; position: relative; }
@@ -60,6 +60,7 @@ button:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -77,14 +78,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectFileButton = document.getElementById('select-file-button');
     const videoFileInput = document.getElementById('video-file-input');
 
-    let app, db, auth;
+    let app, analytics, db, auth;
     let userId = null;
     let peer = null;
     let localStream = null;
     let currentCall = null;
     let dataConnection = null;
-    let userDocRef = null;
-    let unsubscribe = null;
     let isConnected = false;
     let isVideoFileMode = false;
 
@@ -103,6 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 measurementId: "G-QP269HYHHB"
             };
             app = initializeApp(firebaseConfig);
+            analytics = getAnalytics(app);
             db = getFirestore(app);
             auth = getAuth(app);
 
