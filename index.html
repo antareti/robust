@@ -1,39 +1,40 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Видеочат без цензуры</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #1a1a1a; color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        .chat-container { display: flex; flex-direction: column; width: 100%; max-width: 1000px; background-color: #2d2d2d; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); overflow: hidden; border: 1px solid #444; }
-        .video-streams { display: flex; flex-direction: column; flex-wrap: wrap; padding: 15px; gap: 15px; background-color: #1e1e1e; justify-content: center; align-items: center; position: relative; }
-        @media (min-width: 768px) { .video-streams { flex-direction: row; height: 450px; } }
-        .video-box { position: relative; background-color: #000; border-radius: 12px; overflow: hidden; flex: 1 1 45%; width: 100%; max-width: 480px; box-shadow: inset 0 0 15px rgba(0,0,0,0.8); }
-        @media (min-width: 768px) { .video-box { flex-basis: calc(50% - 15px); height: 100%; } }
-        video { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
-        .controls { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; gap: 20px; background-color: #2d2d2d; border-top: 1px solid #3a3a3a; }
-        .status-message { text-align: center; font-size: 1.1em; font-weight: bold; color: #ccc; margin: 0; padding: 10px; }
-        .id-container, .copy-button, .call-container { display: none; }
-        button { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 28px; font-size: 1.1em; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        button:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
-        #start-button { background-image: linear-gradient(45deg, #1e90ff, #0077c2); color: #fff; }
-        #start-button.video-mode { background-image: linear-gradient(45deg, #4CAF50, #388E3C); }
-        #next-button { background-image: linear-gradient(45deg, #ff6347, #e54c33); color: #fff; }
-        #select-file-button { background-color: #555; color: #fff; }
-        #chat-section { display: none; flex-direction: column; padding: 20px; background-color: #222; border-top: 1px solid #333; }
-        #chat-box { height: 150px; background-color: #333; border-radius: 8px; border: 1px solid #444; padding: 10px; overflow-y: auto; margin-bottom: 15px; white-space: pre-wrap; word-wrap: break-word; box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
-        #message-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background-color: #444; color: #f0f2f5; box-sizing: border-box; outline: none; }
-        #message-input::placeholder { color: #aaa; }
-        .message { margin-bottom: 8px; line-height: 1.4; }
-        .self-message { text-align: right; color: #79a1d3; }
-        .other-message { text-align: left; color: #f0f2f5; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Видеочат без цензуры</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<style>
+/* твои стили полностью без изменений */
+body { font-family: 'Inter', sans-serif; background-color: #1a1a1a; color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+.chat-container { display: flex; flex-direction: column; width: 100%; max-width: 1000px; background-color: #2d2d2d; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); overflow: hidden; border: 1px solid #444; }
+.video-streams { display: flex; flex-direction: column; flex-wrap: wrap; padding: 15px; gap: 15px; background-color: #1e1e1e; justify-content: center; align-items: center; position: relative; }
+@media (min-width: 768px) { .video-streams { flex-direction: row; height: 450px; } }
+.video-box { position: relative; background-color: #000; border-radius: 12px; overflow: hidden; flex: 1 1 45%; width: 100%; max-width: 480px; box-shadow: inset 0 0 15px rgba(0,0,0,0.8); }
+@media (min-width: 768px) { .video-box { flex-basis: calc(50% - 15px); height: 100%; } }
+video { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+.controls { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; gap: 20px; background-color: #2d2d2d; border-top: 1px solid #3a3a3a; }
+.status-message { text-align: center; font-size: 1.1em; font-weight: bold; color: #ccc; margin: 0; padding: 10px; }
+.id-container, .copy-button, .call-container { display: none; }
+button { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 28px; font-size: 1.1em; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+button:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
+#start-button { background-image: linear-gradient(45deg, #1e90ff, #0077c2); color: #fff; }
+#start-button.video-mode { background-image: linear-gradient(45deg, #4CAF50, #388E3C); }
+#next-button { background-image: linear-gradient(45deg, #ff6347, #e54c33); color: #fff; }
+#select-file-button { background-color: #555; color: #fff; }
+#chat-section { display: none; flex-direction: column; padding: 20px; background-color: #222; border-top: 1px solid #333; }
+#chat-box { height: 150px; background-color: #333; border-radius: 8px; border: 1px solid #444; padding: 10px; overflow-y: auto; margin-bottom: 15px; white-space: pre-wrap; word-wrap: break-word; box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
+#message-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background-color: #444; color: #f0f2f5; box-sizing: border-box; outline: none; }
+#message-input::placeholder { color: #aaa; }
+.message { margin-bottom: 8px; line-height: 1.4; }
+.self-message { text-align: right; color: #79a1d3; }
+.other-message { text-align: left; color: #f0f2f5; }
+</style>
 </head>
 <body>
 
@@ -47,7 +48,7 @@
         <p id="status-message" class="status-message">Нажмите "Старт", чтобы начать</p>
         <button id="select-file-button"><i class="fas fa-video"></i> Использовать видеофайл</button>
         <input type="file" id="video-file-input" accept="video/*" style="display: none;">
-        <button id="start-button"><i class="fas fa-play"></i> Старт</button>
+        <button id="start-button" disabled><i class="fas fa-play"></i> Старт</button>
         <button id="next-button" style="display: none;"><i class="fas fa-arrow-right-to-bracket"></i> Следующий</button>
     </div>
     
@@ -58,119 +59,164 @@
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    document.addEventListener('DOMContentLoaded', () => {
-        setLogLevel('debug');
+document.addEventListener('DOMContentLoaded', () => {
+    setLogLevel('debug');
 
-        const localVideo = document.getElementById('local-video');
-        const remoteVideo = document.getElementById('remote-video');
-        const startButton = document.getElementById('start-button');
-        const nextButton = document.getElementById('next-button');
-        const statusMessage = document.getElementById('status-message');
-        const chatSection = document.getElementById('chat-section');
-        const chatBox = document.getElementById('chat-box');
-        const messageInput = document.getElementById('message-input');
-        const selectFileButton = document.getElementById('select-file-button');
-        const videoFileInput = document.getElementById('video-file-input');
+    const localVideo = document.getElementById('local-video');
+    const remoteVideo = document.getElementById('remote-video');
+    const startButton = document.getElementById('start-button');
+    const nextButton = document.getElementById('next-button');
+    const statusMessage = document.getElementById('status-message');
+    const chatSection = document.getElementById('chat-section');
+    const chatBox = document.getElementById('chat-box');
+    const messageInput = document.getElementById('message-input');
+    const selectFileButton = document.getElementById('select-file-button');
+    const videoFileInput = document.getElementById('video-file-input');
 
-        let app, db, auth;
-        let userId = null;
-        let peer = null;
-        let localStream = null;
-        let currentCall = null;
-        let dataConnection = null;
-        let userDocRef = null;
-        let unsubscribe = null;
-        let isConnected = false;
-        let isVideoFileMode = false;
+    let app, db, auth;
+    let userId = null;
+    let peer = null;
+    let localStream = null;
+    let currentCall = null;
+    let dataConnection = null;
+    let userDocRef = null;
+    let unsubscribe = null;
+    let isConnected = false;
+    let isVideoFileMode = false;
 
-        const PEER_SERVER = { host: '0.peerjs.com', secure: true, port: 443 };
+    const PEER_SERVER = { host: '0.peerjs.com', secure: true, port: 443 };
 
-        // Инициализация Firebase и аутентификация
-        const initializeFirebase = async () => {
-            try {
-                const firebaseConfig = {
-                    apiKey: "AIzaSyBMbRnraQyUZtiMCLD8QY49ATlVAtIpY2A",
-                    authDomain: "hackforum-9f8d6.firebaseapp.com",
-                    projectId: "hackforum-9f8d6",
-                    storageBucket: "hackforum-9f8d6.appspot.com",
-                    messagingSenderId: "374379711001",
-                    appId: "1:374379711001:web:c7deaf7aed7dc97c7db888",
-                    measurementId: "G-QP269HYHHB"
-                };
+    // --- Firebase ---
+    const initializeFirebase = async () => {
+        try {
+            const firebaseConfig = {
+                apiKey: "AIzaSyBMbRnraQyUZtiMCLD8QY49ATlVAtIpY2A",
+                authDomain: "hackforum-9f8d6.firebaseapp.com",
+                projectId: "hackforum-9f8d6",
+                storageBucket: "hackforum-9f8d6.appspot.com",
+                messagingSenderId: "374379711001",
+                appId: "1:374379711001:web:c7deaf7aed7dc97c7db888",
+                measurementId: "G-QP269HYHHB"
+            };
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
 
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
+            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+            if (initialAuthToken) await signInWithCustomToken(auth, initialAuthToken);
+            else await signInAnonymously(auth);
 
-                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                if (initialAuthToken) await signInWithCustomToken(auth, initialAuthToken);
-                else await signInAnonymously(auth);
+            startButton.disabled = true;
+            statusMessage.textContent = "Ожидание аутентификации...";
 
-                startButton.disabled = true;
-                statusMessage.textContent = "Ожидание аутентификации...";
+            onAuthStateChanged(auth, (user) => { 
+                if(user) {
+                    userId = user.uid; 
+                    statusMessage.textContent = 'Нажмите "Старт", чтобы начать';
+                    startButton.disabled = false;
+                }
+            });
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+            statusMessage.textContent = "Ошибка Firebase: " + error.message;
+        }
+    };
 
-                onAuthStateChanged(auth, (user) => { 
-                    if(user) {
-                        userId = user.uid; 
-                        statusMessage.textContent = 'Нажмите "Старт", чтобы начать';
-                        startButton.disabled = false;
-                    }
+    // --- Отображение сообщений ---
+    const displayMessage = (message, sender) => {
+        const p = document.createElement('p');
+        p.textContent = message;
+        p.classList.add('message', sender === 'self' ? 'self-message' : 'other-message');
+        chatBox.appendChild(p);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    };
+
+    // --- PeerJS ---
+    const startRandomChat = async () => {
+        statusMessage.textContent = 'Поиск собеседника...';
+        chatSection.style.display = 'flex';
+
+        try {
+            if(!peer) {
+                peer = new Peer(userId, PEER_SERVER);
+            }
+
+            if(!localStream){
+                localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
+                localVideo.srcObject = localStream;
+            }
+
+            peer.on('call', (call) => {
+                call.answer(localStream);
+                call.on('stream', (remoteStream)=>{
+                    remoteVideo.srcObject = remoteStream;
                 });
+                currentCall = call;
+            });
 
-            } catch (error) {
-                console.error("Firebase initialization error:", error);
-                statusMessage.textContent = "Ошибка Firebase: " + error.message;
-            }
-        };
+            peer.on('connection', (conn)=>{
+                dataConnection = conn;
+                dataConnection.on('data', (data)=> displayMessage(data,'other'));
+                dataConnection.on('open', ()=> isConnected=true);
+            });
 
-        const displayMessage = (message, sender) => {
-            const p = document.createElement('p');
-            p.textContent = message;
-            p.classList.add('message', sender === 'self' ? 'self-message' : 'other-message');
-            chatBox.appendChild(p);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        };
+        } catch(err){
+            console.error(err);
+            statusMessage.textContent='Ошибка соединения: '+err.message;
+        }
+    };
 
-        // --- остальной код startRandomChat, disconnect, updateStatus, события кнопок --- //
-        // Здесь ничего не меняем, оставляем как у тебя
-        // ... (весь твой JS код начиная с startRandomChat и ниже)
+    const disconnect = () => {
+        if(currentCall) { currentCall.close(); currentCall=null; }
+        if(dataConnection) { dataConnection.close(); dataConnection=null; }
+        isConnected=false;
+        statusMessage.textContent='Отключено';
+    };
 
-        startButton.addEventListener('click', startRandomChat);
-        nextButton.addEventListener('click', ()=>{ disconnect(); startRandomChat(); });
-        selectFileButton.addEventListener('click', ()=>videoFileInput.click());
-        videoFileInput.addEventListener('change', (event)=>{
-            const file = event.target.files[0];
-            if(file){
-                const url = URL.createObjectURL(file);
-                localVideo.srcObject=null;
-                localVideo.src=url;
-                localVideo.loop=true;
-                localVideo.muted=true;
-                localVideo.onloadeddata=()=>{
-                    localVideo.play();
-                    isVideoFileMode=true;
-                    statusMessage.textContent=`Видеофайл "${file.name}" готов. Нажмите "Старт".`;
-                    startButton.textContent="Начать с видеофайлом";
-                    startButton.classList.add('video-mode');
-                };
-            }
-        });
-
-        messageInput.addEventListener('keydown', (event)=>{
-            if(event.key==='Enter' && messageInput.value.trim()!=='' && dataConnection && isConnected){
-                const message=messageInput.value;
-                displayMessage(message,'self');
-                dataConnection.send(message);
-                messageInput.value='';
-            }
-        });
-
-        initializeFirebase();
+    // --- События кнопок ---
+    startButton.addEventListener('click', async () => {
+        if(isVideoFileMode && localVideo.src){
+            localStream = localVideo.captureStream();
+        }
+        startRandomChat();
     });
+
+    nextButton.addEventListener('click', ()=>{ disconnect(); startRandomChat(); });
+    selectFileButton.addEventListener('click', ()=> videoFileInput.click());
+
+    videoFileInput.addEventListener('change', (event)=>{
+        const file = event.target.files[0];
+        if(file){
+            const url = URL.createObjectURL(file);
+            localVideo.srcObject=null;
+            localVideo.src=url;
+            localVideo.loop=true;
+            localVideo.muted=true;
+            localVideo.onloadeddata=()=>{
+                localVideo.play();
+                isVideoFileMode=true;
+                statusMessage.textContent=`Видеофайл "${file.name}" готов. Нажмите "Старт".`;
+                startButton.textContent="Начать с видеофайлом";
+                startButton.classList.add('video-mode');
+            };
+        }
+    });
+
+    messageInput.addEventListener('keydown', (event)=>{
+        if(event.key==='Enter' && messageInput.value.trim()!=='' && dataConnection && isConnected){
+            const message=messageInput.value;
+            displayMessage(message,'self');
+            dataConnection.send(message);
+            messageInput.value='';
+        }
+    });
+
+    initializeFirebase();
+});
 </script>
 
 </body>
