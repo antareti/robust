@@ -3,392 +3,558 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HACKBOOK</title>
+    <title>Видеочат без цензуры</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        /*
-         * Настройки цвета и шрифта
-         * Вы можете изменить эти значения для персонализации сайта.
-         */
-        :root {
-            --bg-primary: #1A2C1B;      /* Основной темный фон (темно-зеленый) */
-            --bg-secondary: #2C3B2D;    /* Цвет карточек и блоков (другой оттенок зеленого) */
-            --text-color: #e2e8f0;      /* Основной цвет текста */
-            --accent-color: #3AFF00;    /* Яркий акцентный цвет (неоновый зеленый) */
-            --font-family: 'Roboto Mono', monospace;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a1a;
+            color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
-        body {
-            font-family: var(--font-family);
-            background-color: var(--bg-primary);
-            color: var(--text-color);
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1000px;
+            background-color: #2d2d2d;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            border: 1px solid #444;
         }
-        .text-neon-accent {
-            color: var(--accent-color);
-            text-shadow: 0 0 8px var(--accent-color);
+
+        .video-streams {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            padding: 15px;
+            gap: 15px;
+            background-color: #1e1e1e;
+            justify-content: center;
+            align-items: center;
+            position: relative;
         }
-        .bg-card {
-            background-color: var(--bg-secondary);
+        
+        @media (min-width: 768px) {
+            .video-streams {
+                flex-direction: row;
+                height: 450px;
+            }
         }
-        .btn {
-            @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+
+        .video-box {
+            position: relative;
+            background-color: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            flex: 1 1 45%;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
         }
-        .btn-primary {
-            @apply bg-[var(--accent-color)] hover:bg-green-700 text-black;
+        
+        @media (min-width: 768px) {
+            .video-box {
+                flex-basis: calc(50% - 15px);
+                height: 100%;
+            }
         }
-        .btn-secondary {
-            @apply bg-gray-600 hover:bg-gray-700 text-gray-200;
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
         }
-        .card {
-            @apply p-6 bg-card rounded-lg shadow-lg;
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            gap: 20px;
+            background-color: #2d2d2d;
+            border-top: 1px solid #3a3a3a;
         }
-        .logo-text {
-            font-family: var(--font-family);
-            font-weight: 700;
+        
+        .status-message {
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #ccc;
+            margin: 0;
+            padding: 10px;
         }
-        input, textarea {
-            background-color: #213022;
-            color: white;
+
+        .id-container {
+            display: none;
         }
-        input::placeholder, textarea::placeholder {
-            color: #79917A;
+
+        .copy-button {
+            display: none;
         }
-        a {
-            color: #4CAF50; /* Зеленый цвет для ссылок */
+        
+        .call-container {
+            display: none;
         }
-        a:hover {
-            color: #81C784;
+
+        button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 28px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        #start-button {
+            background-image: linear-gradient(45deg, #1e90ff, #0077c2);
+            color: #fff;
+        }
+
+        #start-button.video-mode {
+            background-image: linear-gradient(45deg, #4CAF50, #388E3C);
+        }
+        
+        #next-button {
+            background-image: linear-gradient(45deg, #ff6347, #e54c33);
+            color: #fff;
+        }
+
+        #select-file-button {
+            background-color: #555;
+            color: #fff;
+        }
+        
+        #chat-section {
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            background-color: #222;
+            border-top: 1px solid #333;
+        }
+
+        #chat-box {
+            height: 150px;
+            background-color: #333;
+            border-radius: 8px;
+            border: 1px solid #444;
+            padding: 10px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        #message-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background-color: #444;
+            color: #f0f2f5;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        #message-input::placeholder {
+            color: #aaa;
+        }
+        
+        .message {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .self-message {
+            text-align: right;
+            color: #79a1d3;
+        }
+        
+        .other-message {
+            text-align: left;
+            color: #f0f2f5;
+        }
+
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200">
+<body>
 
-    <!-- Main Container -->
-    <div id="app" class="min-h-screen flex flex-col items-center p-4">
-
-        <!-- Navigation Bar -->
-        <header id="nav" class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 bg-[var(--bg-secondary)] shadow-md">
-            <h1 class="text-3xl font-bold text-neon-accent logo-text">HACKBOOK</h1>
-            <nav class="flex items-center space-x-4">
-                <button class="btn btn-secondary" onclick="showPage('home')">Главная</button>
-                <button class="btn btn-secondary" onclick="showPage('profile')">Профиль</button>
-                <button class="btn btn-secondary" onclick="showPage('messages')">Сообщения</button>
-                <button class="btn btn-secondary" onclick="logout()">Выйти</button>
-            </nav>
-        </header>
-        
-        <!-- Welcome/Login Page -->
-        <main id="welcome-page" class="flex flex-col items-center justify-center flex-grow w-full max-w-lg mx-auto">
-            <div class="card w-full text-center">
-                <h2 class="text-4xl font-bold text-neon-accent mb-4">Добро пожаловать в HACKBOOK</h2>
-                <p class="text-lg text-gray-400 mb-8">Социальная сеть для тех, кто понимает, что такое байты.</p>
-                <form id="login-form" class="space-y-4">
-                    <input type="text" id="username" placeholder="Имя пользователя" class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]">
-                    <input type="password" id="password" placeholder="Пароль" class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]">
-                    <button type="submit" class="w-full btn btn-primary">Войти</button>
-                </form>
-                <p class="mt-4 text-sm text-gray-400">
-                    Нет аккаунта? <a href="#" id="show-register" class="text-green-400 hover:underline">Зарегистрироваться</a>
-                </p>
-            </div>
-        </main>
-
-        <!-- Register Page -->
-        <main id="register-page" class="hidden flex-col items-center justify-center flex-grow w-full max-w-lg mx-auto">
-            <div class="card w-full text-center">
-                <h2 class="text-4xl font-bold text-neon-accent mb-4">Регистрация</h2>
-                <form id="register-form" class="space-y-4">
-                    <input type="text" id="new-username" placeholder="Имя пользователя" class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]">
-                    <input type="password" id="new-password" placeholder="Пароль" class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]">
-                    <button type="submit" class="w-full btn btn-primary">Зарегистрироваться</button>
-                </form>
-                <p class="mt-4 text-sm text-gray-400">
-                    Уже есть аккаунт? <a href="#" id="show-login" class="text-green-400 hover:underline">Войти</a>
-                </p>
-            </div>
-        </main>
-        
-        <!-- Home Page (hidden by default) -->
-        <main id="home-page" class="hidden flex flex-col flex-grow w-full max-w-4xl pt-20 pb-4">
-            <div class="card mb-4">
-                <h2 class="text-2xl font-semibold mb-4">Что у вас на уме?</h2>
-                <textarea id="new-post-content" placeholder="Напишите что-нибудь..." class="w-full p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] resize-none h-24"></textarea>
-                <button id="post-btn" class="mt-4 btn btn-primary">Опубликовать</button>
-            </div>
-
-            <div id="posts-container" class="space-y-6">
-                <!-- Posts will be dynamically inserted here -->
-            </div>
-        </main>
-        
-        <!-- Profile Page (hidden by default) -->
-        <main id="profile-page" class="hidden flex flex-col flex-grow w-full max-w-4xl pt-20 pb-4">
-            <div class="card text-center mb-6">
-                <img id="profile-picture" class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-neon-accent" src="https://placehold.co/128x128/2d3748/e2e8f0?text=Профиль" alt="Профиль">
-                <h2 id="profile-username" class="text-3xl font-bold text-neon-accent mb-2"></h2>
-                <p id="profile-bio" class="text-gray-400 italic">"Мы — то, что мы публикуем."</p>
-            </div>
-            
-            <!-- New section to change avatar -->
-            <div class="card mb-6">
-                <h3 class="text-2xl font-semibold mb-4">Изменить аватар</h3>
-                <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-                    <input type="url" id="avatar-url-input" placeholder="Введите URL изображения..." class="flex-grow px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]">
-                    <button id="save-avatar-btn" class="btn btn-primary">Сохранить аватар</button>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 class="text-2xl font-semibold mb-4">Мои посты</h3>
-                <div id="my-posts-container" class="space-y-4">
-                    <!-- User's posts will be dynamically inserted here -->
-                </div>
-            </div>
-        </main>
-        
-        <!-- Messages Page (hidden by default) -->
-        <main id="messages-page" class="hidden flex flex-col flex-grow w-full max-w-4xl pt-20 pb-4">
-            <div class="card h-full flex flex-col">
-                <h2 class="text-2xl font-semibold mb-4">Сообщения</h2>
-                <div id="messages-list" class="flex-grow overflow-y-auto space-y-4 p-4 rounded-lg bg-[var(--bg-secondary)]">
-                    <!-- Messages will be dynamically inserted here -->
-                </div>
-                <div class="mt-4 flex items-center">
-                    <input type="text" id="new-message-input" placeholder="Введите сообщение..." class="flex-grow px-4 py-2 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]">
-                    <button id="send-message-btn" class="btn btn-primary rounded-l-none">Отправить</button>
-                </div>
-            </div>
-        </main>
-
-        <!-- Message/Alert Box -->
-        <div id="message-box" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card p-6 rounded-lg shadow-xl hidden z-50">
-            <p id="message-text" class="text-center font-medium"></p>
-            <button id="message-box-ok" class="mt-4 w-full btn btn-primary">ОК</button>
+<div class="chat-container">
+    <div class="video-streams">
+        <div class="video-box">
+            <video id="local-video" muted autoplay playsinline></video>
         </div>
-
+        <div class="video-box">
+            <video id="remote-video" autoplay playsinline></video>
+        </div>
     </div>
 
-    <script>
-        // Placeholder data for demonstration
-        let currentUser = null;
-        let users = {
-            'hacker_1': { password: 'password', bio: 'Люблю взламывать и код, и орехи.', avatarUrl: null },
-            'hacker_2': { password: 'pass', bio: 'Привет, мир!', avatarUrl: null }
-        };
-        let posts = [
-            { id: 1, user: 'hacker_1', content: 'Только что обнаружил нулевую уязвимость в этом старом протоколе. ', comments: [] },
-            { id: 2, user: 'hacker_2', content: 'Готовимся к CTF. Какие-нибудь советы по реверс-инжинирингу?', comments: [{ user: 'hacker_1', text: 'Начни с IDA Pro, это классика.' }] }
-        ];
+    <div class="controls">
+        <p id="status-message" class="status-message">Нажмите "Старт", чтобы начать</p>
+        <button id="select-file-button">
+            <i class="fas fa-video"></i> Использовать видеофайл
+        </button>
+        <input type="file" id="video-file-input" accept="video/*" style="display: none;">
+        <button id="start-button">
+            <i class="fas fa-play"></i> Старт
+        </button>
+        <button id="next-button" style="display: none;">
+            <i class="fas fa-arrow-right-to-bracket"></i> Следующий
+        </button>
+    </div>
+    
+    <div id="chat-section">
+        <div id="chat-box"></div>
+        <input type="text" id="message-input" placeholder="Введите сообщение...">
+    </div>
+</div>
 
-        // UI elements
-        const app = document.getElementById('app');
-        const nav = document.getElementById('nav');
-        const welcomePage = document.getElementById('welcome-page');
-        const registerPage = document.getElementById('register-page');
-        const homePage = document.getElementById('home-page');
-        const profilePage = document.getElementById('profile-page');
-        const messagesPage = document.getElementById('messages-page');
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        const showRegisterBtn = document.getElementById('show-register');
-        const showLoginBtn = document.getElementById('show-login');
-        const postsContainer = document.getElementById('posts-container');
-        const myPostsContainer = document.getElementById('my-posts-container');
-        const newPostContent = document.getElementById('new-post-content');
-        const postBtn = document.getElementById('post-btn');
-        const profileUsername = document.getElementById('profile-username');
-        const profileBio = document.getElementById('profile-bio');
-        const messageBox = document.getElementById('message-box');
-        const messageText = document.getElementById('message-text');
-        const messageBoxOk = document.getElementById('message-box-ok');
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // New elements for avatar
-        const avatarUrlInput = document.getElementById('avatar-url-input');
-        const saveAvatarBtn = document.getElementById('save-avatar-btn');
-        const profilePicture = document.getElementById('profile-picture');
-
-        // Functions to show/hide pages
-        function hideAllPages() {
-            welcomePage.classList.add('hidden');
-            registerPage.classList.add('hidden');
-            homePage.classList.add('hidden');
-            profilePage.classList.add('hidden');
-            messagesPage.classList.add('hidden');
-            nav.classList.add('hidden');
-        }
-
-        function showPage(pageId) {
-            hideAllPages();
-            nav.classList.remove('hidden');
-            if (pageId === 'home') homePage.classList.remove('hidden');
-            if (pageId === 'profile') {
-                renderProfile();
-                profilePage.classList.remove('hidden');
-            }
-            if (pageId === 'messages') messagesPage.classList.remove('hidden');
-            renderPosts();
-        }
-
-        function showMessageBox(text) {
-            messageText.textContent = text;
-            messageBox.classList.remove('hidden');
-        }
-
-        messageBoxOk.addEventListener('click', () => {
-            messageBox.classList.add('hidden');
-        });
-
-        // Event Listeners for auth pages
-        showRegisterBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            welcomePage.classList.add('hidden');
-            registerPage.classList.remove('hidden');
-        });
-
-        showLoginBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            registerPage.classList.add('hidden');
-            welcomePage.classList.remove('hidden');
-        });
-
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const username = e.target.username.value;
-            const password = e.target.password.value;
-            if (users[username] && users[username].password === password) {
-                currentUser = username;
-                showMessageBox('Вход выполнен успешно!');
-                showPage('home');
-            } else {
-                showMessageBox('Неправильное имя пользователя или пароль!');
-            }
-        });
-
-        registerForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newUsername = e.target['new-username'].value;
-            const newPassword = e.target['new-password'].value;
-            if (users[newUsername]) {
-                showMessageBox('Это имя пользователя уже занято!');
-            } else {
-                users[newUsername] = { password: newPassword, bio: 'Новый пользователь HACKBOOK.', avatarUrl: null };
-                showMessageBox('Регистрация прошла успешно! Теперь вы можете войти.');
-                registerPage.classList.add('hidden');
-                welcomePage.classList.remove('hidden');
-            }
-        });
-
-        function logout() {
-            currentUser = null;
-            hideAllPages();
-            welcomePage.classList.remove('hidden');
-            showMessageBox('Вы вышли из системы.');
-        }
-
-        // Functions for rendering content
-        function createPostElement(post) {
-            const postElement = document.createElement('div');
-            postElement.classList.add('card');
-            postElement.innerHTML = `
-                <div class="flex items-center mb-4">
-                    <img class="w-10 h-10 rounded-full mr-4 border border-gray-500" src="${users[post.user].avatarUrl || `https://placehold.co/40x40/2d3748/e2e8f0?text=${post.user.charAt(0).toUpperCase()}`}" alt="Аватар" onerror="this.onerror=null;this.src='https://placehold.co/40x40/2d3748/e2e8f0?text=Ошибка'">
-                    <span class="font-bold text-neon-accent">${post.user}</span>
-                </div>
-                <p class="text-gray-300 mb-4">${post.content}</p>
-                <div class="comments space-y-2 border-t border-gray-700 pt-4">
-                    <h4 class="font-semibold text-gray-400">Комментарии</h4>
-                    <div class="comments-list space-y-2">
-                        ${post.comments.map(comment => `
-                            <div class="flex items-start">
-                                <span class="font-medium text-green-400 mr-2">${comment.user}:</span>
-                                <p class="text-sm text-gray-400 flex-grow">${comment.text}</p>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <form class="add-comment-form mt-4 flex">
-                        <input type="text" placeholder="Добавить комментарий..." class="flex-grow px-3 py-1 rounded-l-lg focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)]">
-                        <button type="submit" class="btn btn-primary rounded-l-none text-sm">Отправить</button>
-                    </form>
-                </div>
-            `;
-            // Add event listener for new comments
-            postElement.querySelector('.add-comment-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const commentInput = e.target.querySelector('input');
-                const commentText = commentInput.value;
-                if (commentText.trim() !== '' && currentUser) {
-                    post.comments.push({ user: currentUser, text: commentText });
-                    renderPosts();
-                } else if (!currentUser) {
-                    showMessageBox('Вы должны войти в систему, чтобы комментировать.');
-                }
-                commentInput.value = '';
-            });
-            return postElement;
-        }
-
-        function renderPosts() {
-            postsContainer.innerHTML = '';
-            myPostsContainer.innerHTML = '';
-            posts.forEach(post => {
-                const postElement = createPostElement(post);
-                postsContainer.appendChild(postElement);
-                if (post.user === currentUser) {
-                    myPostsContainer.appendChild(createPostElement(post));
-                }
-            });
-        }
-
-        postBtn.addEventListener('click', () => {
-            const content = newPostContent.value.trim();
-            if (content !== '' && currentUser) {
-                const newPost = {
-                    id: posts.length + 1,
-                    user: currentUser,
-                    content: content,
-                    comments: []
-                };
-                posts.unshift(newPost); // Add to the beginning of the list
-                newPostContent.value = '';
-                renderPosts();
-            } else if (!currentUser) {
-                showMessageBox('Вы должны войти в систему, чтобы публиковать.');
-            }
-        });
-
-        function renderProfile() {
-            if (currentUser) {
-                profileUsername.textContent = currentUser;
-                profileBio.textContent = users[currentUser].bio;
-                if (users[currentUser].avatarUrl) {
-                    profilePicture.src = users[currentUser].avatarUrl;
-                    profilePicture.onerror = function() {
-                        this.src = `https://placehold.co/128x128/2d3748/e2e8f0?text=Ошибка`;
-                    };
-                } else {
-                    profilePicture.src = `https://placehold.co/128x128/2d3748/e2e8f0?text=${currentUser.charAt(0).toUpperCase()}`;
-                }
-            }
-        }
+    document.addEventListener('DOMContentLoaded', () => {
+        setLogLevel('debug'); // for debugging purposes
         
-        // Event listener for saving the new avatar URL
-        saveAvatarBtn.addEventListener('click', () => {
-            const newAvatarUrl = avatarUrlInput.value.trim();
-            if (newAvatarUrl) {
-                users[currentUser].avatarUrl = newAvatarUrl;
-                renderProfile();
-                showMessageBox('Аватар обновлен!');
-            } else {
-                showMessageBox('Пожалуйста, введите корректный URL.');
+        const localVideo = document.getElementById('local-video');
+        const remoteVideo = document.getElementById('remote-video');
+        const startButton = document.getElementById('start-button');
+        const nextButton = document.getElementById('next-button');
+        const statusMessage = document.getElementById('status-message');
+        const chatSection = document.getElementById('chat-section');
+        const chatBox = document.getElementById('chat-box');
+        const messageInput = document.getElementById('message-input');
+        const selectFileButton = document.getElementById('select-file-button');
+        const videoFileInput = document.getElementById('video-file-input');
+        
+        // --- Firebase & PeerJS variables ---
+        let app, db, auth;
+        let userId = null;
+        let peer = null;
+        let localStream = null;
+        let currentCall = null;
+        let dataConnection = null;
+        let userDocRef = null;
+        let unsubscribe = null;
+        let isConnected = false;
+        let isVideoFileMode = false;
+
+        const PEER_SERVER = {
+            host: '0.peerjs.com',
+            secure: true,
+            port: 443
+        };
+
+        // --- Firebase Initialization ---
+        const initializeFirebase = async () => {
+            try {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                // Sign in with custom token
+                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Firebase authenticated. User ID:", userId);
+                    } else {
+                        console.log("Firebase not authenticated.");
+                    }
+                });
+                
+            } catch (error) {
+                console.error("Firebase initialization error:", error);
+            }
+        };
+
+        const displayMessage = (message, sender) => {
+            const p = document.createElement('p');
+            p.textContent = message;
+            p.classList.add('message');
+            p.classList.add(sender === 'self' ? 'self-message' : 'other-message');
+            chatBox.appendChild(p);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        };
+
+        // --- Main Chat Logic ---
+        const startRandomChat = async () => {
+            if (!userId) {
+                console.warn("User not authenticated yet. Retrying startChat.");
+                setTimeout(startRandomChat, 500);
+                return;
+            }
+
+            try {
+                // Clear any previous streams
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                }
+                remoteVideo.srcObject = null;
+                isConnected = false;
+
+                // Determine video source
+                if (isVideoFileMode && localVideo.src) {
+                    statusMessage.textContent = 'Используется видеофайл...';
+                    localVideo.play();
+                    localStream = localVideo.captureStream();
+                } else {
+                    statusMessage.textContent = 'Запрашиваем доступ к камере и микрофону...';
+                    localVideo.srcObject = null; // Clear old video source
+                    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    localVideo.srcObject = localStream;
+                }
+                
+                statusMessage.textContent = 'Поиск собеседника...';
+                if (peer) {
+                    peer.destroy();
+                }
+                peer = new Peer(undefined, PEER_SERVER);
+
+                peer.on('open', async (id) => {
+                    console.log('My Peer ID is:', id);
+                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                    const publicCollection = collection(db, `artifacts/${appId}/public/data/available_peers`);
+                    const myDocId = `${userId}-${Date.now()}`;
+                    userDocRef = doc(publicCollection, myDocId);
+
+                    // Add user to the queue with a unique ID
+                    await setDoc(userDocRef, {
+                        peerId: id,
+                        timestamp: serverTimestamp()
+                    });
+                    
+                    // Listen for real-time changes in the collection
+                    unsubscribe = onSnapshot(publicCollection, async (snapshot) => {
+                        if (isConnected) return; // Prevent multiple connections
+
+                        // Filter for valid peers with timestamps
+                        const validPeers = snapshot.docs
+                            .filter(doc => doc.data().timestamp)
+                            .map(doc => ({ ...doc.data(), id: doc.id }));
+
+                        if (validPeers.length > 1) {
+                            const sortedPeers = validPeers.sort((a, b) => b.timestamp.toMillis() - a.timestamp.toMillis());
+                            const newestPeer = sortedPeers[0];
+                            
+                            if (newestPeer.id === myDocId) {
+                                const partnerPeer = sortedPeers.find(p => p.id !== myDocId);
+                                if (!partnerPeer) {
+                                    return; // Should not happen with length check, but for safety
+                                }
+                                console.log(`Found a partner: ${partnerPeer.peerId}`);
+                                
+                                // Clean up our entry from the database
+                                if (unsubscribe) {
+                                    unsubscribe();
+                                }
+                                await deleteDoc(doc(publicCollection, partnerPeer.id));
+                                await deleteDoc(userDocRef);
+
+                                // Initiate the call
+                                const call = peer.call(partnerPeer.peerId, localStream);
+                                call.on('stream', (remoteStream) => {
+                                    remoteVideo.srcObject = remoteStream;
+                                    updateStatus('connected');
+                                });
+                                call.on('close', () => disconnect());
+                                currentCall = call;
+
+                                // Establish data connection
+                                dataConnection = peer.connect(partnerPeer.peerId);
+                                dataConnection.on('open', () => chatSection.style.display = 'flex');
+                                dataConnection.on('data', (data) => displayMessage(data, 'other'));
+                                dataConnection.on('close', () => disconnect());
+                            }
+                        }
+                    });
+                });
+
+                peer.on('call', (call) => {
+                    if (isConnected) {
+                        call.close();
+                        return;
+                    }
+                    console.log('Incoming call, accepting...');
+                    
+                    // Clean up our document from the database
+                    if (unsubscribe) {
+                        unsubscribe();
+                    }
+                    if (userDocRef) {
+                        deleteDoc(userDocRef);
+                    }
+                    
+                    currentCall = call;
+                    call.answer(localStream);
+                    call.on('stream', (remoteStream) => {
+                        remoteVideo.srcObject = remoteStream;
+                        updateStatus('connected');
+                    });
+                    call.on('close', () => disconnect());
+                });
+
+                peer.on('connection', (conn) => {
+                    if (isConnected) {
+                        conn.close();
+                        return;
+                    }
+                    console.log('Incoming data connection');
+                    dataConnection = conn;
+                    dataConnection.on('open', () => chatSection.style.display = 'flex');
+                    dataConnection.on('data', (data) => displayMessage(data, 'other'));
+                    dataConnection.on('close', () => disconnect());
+                });
+
+                peer.on('error', (err) => {
+                    console.error('Peer error:', err);
+                    statusMessage.textContent = 'Ошибка: ' + err.message;
+                    disconnect();
+                });
+                
+            } catch (err) {
+                console.error('Error getting media:', err);
+                statusMessage.textContent = 'Ошибка: Не удалось получить доступ к камере/микрофону.';
+                startButton.style.display = 'block';
+                nextButton.style.display = 'none';
+            }
+        };
+
+        const disconnect = async () => {
+            if (currentCall) {
+                currentCall.close();
+            }
+            if (dataConnection) {
+                dataConnection.close();
+            }
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+
+            if (unsubscribe) {
+                unsubscribe();
+            }
+            
+            if (userDocRef) {
+                try {
+                    await deleteDoc(userDocRef);
+                    console.log("User entry removed from Firestore.");
+                } catch (e) {
+                    console.error("Error removing user entry from Firestore:", e);
+                }
+            }
+            userDocRef = null;
+
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            remoteVideo.srcObject = null;
+            isConnected = false;
+            
+            startButton.style.display = 'block';
+            nextButton.style.display = 'none';
+            chatSection.style.display = 'none';
+            chatBox.innerHTML = '';
+            statusMessage.textContent = 'Нажмите "Старт", чтобы начать';
+
+            // Reset file mode
+            isVideoFileMode = false;
+            localVideo.src = '';
+            startButton.textContent = "Старт";
+            startButton.classList.remove('video-mode');
+        };
+
+        const updateStatus = (status) => {
+            if (status === 'connected') {
+                statusMessage.textContent = 'Вы подключены!';
+                startButton.style.display = 'none';
+                nextButton.style.display = 'block';
+                isConnected = true;
+            } else if (status === 'connecting') {
+                statusMessage.textContent = 'Подключение...';
+                startButton.style.display = 'none';
+                nextButton.style.display = 'block';
+            }
+        };
+
+        // --- Event Listeners ---
+        startButton.addEventListener('click', startRandomChat);
+        nextButton.addEventListener('click', () => {
+            disconnect();
+            startRandomChat();
+        });
+
+        // Handle video file selection
+        selectFileButton.addEventListener('click', () => {
+            videoFileInput.click();
+        });
+
+        videoFileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                localVideo.srcObject = null;
+                localVideo.src = url;
+                localVideo.loop = true; // Loop the video for continuous playback
+                localVideo.muted = true; // Mute the local video
+                localVideo.onloadeddata = () => {
+                    localVideo.play();
+                    isVideoFileMode = true;
+                    statusMessage.textContent = `Видеофайл "${file.name}" готов. Нажмите "Старт".`;
+                    startButton.textContent = "Начать с видеофайлом";
+                    startButton.classList.add('video-mode');
+                };
             }
         });
 
-        // Initial render
-        hideAllPages();
-        welcomePage.classList.remove('hidden');
-    </script>
+        messageInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && messageInput.value.trim() !== '' && dataConnection && isConnected) {
+                const message = messageInput.value;
+                displayMessage(message, 'self');
+                dataConnection.send(message);
+                messageInput.value = '';
+            }
+        });
+
+        initializeFirebase();
+    });
+</script>
+
 </body>
 </html>
