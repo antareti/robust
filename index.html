@@ -275,12 +275,30 @@
         // --- Firebase Initialization ---
         const initializeFirebase = async () => {
             try {
-                const firebaseConfig = JSON.parse(__firebase_config);
+                // Check if the app is running in the Canvas environment
+                if (typeof __firebase_config === 'undefined' || typeof __initial_auth_token === 'undefined') {
+                    console.error("Firebase variables are not defined. This code is designed for the Canvas environment.");
+                    console.error("To deploy externally, you must provide your own Firebase config and handle authentication.");
+                    statusMessage.textContent = "Ошибка: Firebase не настроен для внешнего развертывания.";
+                    // Optionally, you can return here to prevent further errors
+                    // return;
+                }
+                
+                // If variables are available (in Canvas), use them. Otherwise, provide a placeholder.
+                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+                    apiKey: "YOUR_API_KEY",
+                    authDomain: "YOUR_AUTH_DOMAIN",
+                    projectId: "YOUR_PROJECT_ID",
+                    storageBucket: "YOUR_STORAGE_BUCKET",
+                    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+                    appId: "YOUR_APP_ID"
+                };
+
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                // Sign in with custom token
+                // Sign in with custom token if available, otherwise anonymously
                 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
@@ -299,6 +317,7 @@
                 
             } catch (error) {
                 console.error("Firebase initialization error:", error);
+                statusMessage.textContent = "Ошибка Firebase: " + error.message;
             }
         };
 
@@ -315,6 +334,7 @@
         const startRandomChat = async () => {
             if (!userId) {
                 console.warn("User not authenticated yet. Retrying startChat.");
+                statusMessage.textContent = "Ожидание аутентификации пользователя...";
                 setTimeout(startRandomChat, 500);
                 return;
             }
@@ -442,7 +462,9 @@
 
                 peer.on('error', (err) => {
                     console.error('Peer error:', err);
-                    statusMessage.textContent = 'Ошибка: ' + err.message;
+                    // Provide a user-friendly error message on the UI
+                    statusMessage.textContent = 'Ошибка подключения. Пожалуйста, нажмите "Следующий", чтобы попробовать снова.';
+                    // Ensure state is clean for a new connection attempt
                     disconnect();
                 });
                 
