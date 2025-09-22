@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
-/* стили без изменений */
+/* стили полностью без изменений */
 body { font-family: 'Inter', sans-serif; background-color: #1a1a1a; color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
 .chat-container { display: flex; flex-direction: column; width: 100%; max-width: 1000px; background-color: #2d2d2d; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); overflow: hidden; border: 1px solid #444; }
 .video-streams { display: flex; flex-direction: column; flex-wrap: wrap; padding: 15px; gap: 15px; background-color: #1e1e1e; justify-content: center; align-items: center; position: relative; }
@@ -26,7 +26,7 @@ button:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.
 #start-button { background-image: linear-gradient(45deg, #1e90ff, #0077c2); color: #fff; }
 #start-button.video-mode { background-image: linear-gradient(45deg, #4CAF50, #388E3C); }
 #next-button { background-image: linear-gradient(45deg, #ff6347, #e54c33); color: #fff; }
-#select-file-button { background-color: #555; color: #fff; }
+#select-file-button, #select-remote-file-button { background-color: #555; color: #fff; }
 #chat-section { display: none; flex-direction: column; padding: 20px; background-color: #222; border-top: 1px solid #333; }
 #chat-box { height: 150px; background-color: #333; border-radius: 8px; border: 1px solid #444; padding: 10px; overflow-y: auto; margin-bottom: 15px; white-space: pre-wrap; word-wrap: break-word; box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
 #message-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background-color: #444; color: #f0f2f5; box-sizing: border-box; outline: none; }
@@ -46,8 +46,12 @@ button:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.
 
     <div class="controls">
         <p id="status-message" class="status-message">Нажмите "Старт", чтобы начать</p>
-        <button id="select-file-button"><i class="fas fa-video"></i> Использовать видеофайл</button>
+        <button id="select-file-button"><i class="fas fa-video"></i> Использовать видеофайл (свой)</button>
         <input type="file" id="video-file-input" accept="video/*" style="display: none;">
+
+        <button id="select-remote-file-button"><i class="fas fa-video"></i> Использовать видеофайл (вторая камера)</button>
+        <input type="file" id="remote-video-file-input" accept="video/*" style="display: none;">
+
         <button id="start-button" disabled><i class="fas fa-play"></i> Старт</button>
         <button id="next-button" style="display: none;"><i class="fas fa-arrow-right-to-bracket"></i> Следующий</button>
     </div>
@@ -60,7 +64,6 @@ button:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -77,13 +80,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageInput = document.getElementById('message-input');
     const selectFileButton = document.getElementById('select-file-button');
     const videoFileInput = document.getElementById('video-file-input');
+    const selectRemoteFileButton = document.getElementById('select-remote-file-button');
+    const remoteVideoFileInput = document.getElementById('remote-video-file-input');
 
-    let app, analytics, db, auth;
+    let app, db, auth;
     let userId = null;
     let peer = null;
     let localStream = null;
     let currentCall = null;
     let dataConnection = null;
+    let userDocRef = null;
+    let unsubscribe = null;
     let isConnected = false;
     let isVideoFileMode = false;
 
@@ -102,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 measurementId: "G-QP269HYHHB"
             };
             app = initializeApp(firebaseConfig);
-            analytics = getAnalytics(app);
             db = getFirestore(app);
             auth = getAuth(app);
 
@@ -187,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     nextButton.addEventListener('click', ()=>{ disconnect(); startRandomChat(); });
     selectFileButton.addEventListener('click', ()=> videoFileInput.click());
+    selectRemoteFileButton.addEventListener('click', ()=> remoteVideoFileInput.click());
 
     videoFileInput.addEventListener('change', (event)=>{
         const file = event.target.files[0];
@@ -202,6 +209,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusMessage.textContent=`Видеофайл "${file.name}" готов. Нажмите "Старт".`;
                 startButton.textContent="Начать с видеофайлом";
                 startButton.classList.add('video-mode');
+            };
+        }
+    });
+
+    remoteVideoFileInput.addEventListener('change', (event)=>{
+        const file = event.target.files[0];
+        if(file){
+            const url = URL.createObjectURL(file);
+            remoteVideo.srcObject=null;
+            remoteVideo.src=url;
+            remoteVideo.loop=true;
+            remoteVideo.muted=false;
+            remoteVideo.onloadeddata=()=>{
+                remoteVideo.play();
+                statusMessage.textContent=`Видеофайл для второй камеры: "${file.name}" загружен.`;
             };
         }
     });
