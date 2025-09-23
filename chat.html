@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Darknet Videochat — Peer Connect</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: monospace;
+      background: linear-gradient(180deg, #000, #111);
+      color: #ff9900;
+      min-height: 200vh; /* чтобы был скролл */
+    }
+    h1 {
+      text-align: center;
+      font-size: 3rem;
+      margin-top: 2rem;
+      text-shadow: 0 0 10px #ff9900;
+    }
+    #webrtc-module {
+      width: 360px;
+      background: rgba(0,0,0,0.85);
+      border: 2px solid #ff9900;
+      border-radius: 12px;
+      padding: 10px;
+      color: #ff9900;
+      font-family: monospace;
+      margin: 2rem auto; /* центрируем и блок скроллится */
+    }
+    #webrtc-module video {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 6px;
+    }
+    .btn {
+      padding: .5rem 1rem;
+      border-radius: .5rem;
+      font-weight: 800;
+      border: 2px solid #ff9900;
+      color: #ff9900;
+      background: #000;
+      cursor: pointer;
+      margin-top: 4px;
+      width: 48%;
+    }
+    .btn:hover {
+      background: #ff9900;
+      color: #000;
+    }
+    textarea {
+      width: 100%;
+      background: #000;
+      color: #ff9900;
+      border: 1px solid #ff9900;
+      border-radius: 6px;
+      margin-top: 4px;
+    }
+    .flex-between { display: flex; justify-content: space-between; }
+  </style>
+</head>
+<body>
+
+<h1>💻 Darknet Videochat — Peer Connect</h1>
+<p style="text-align:center; margin:2rem;">Прокрутите страницу — видеочат теперь прокручивается вместе с контентом.</p>
+
+<div id="webrtc-module">
+  <h3 style="text-align:center; margin-bottom:10px;">🔗 Peer Video</h3>
+  <video id="localPeerVideo" autoplay muted></video>
+  <video id="remotePeerVideo" autoplay></video>
+
+  <div class="flex-between">
+    <button id="createOfferBtn" class="btn">📝 Создать оффер</button>
+    <button id="acceptOfferBtn" class="btn">✅ Принять оффер</button>
+  </div>
+
+  <div id="offerBlock" style="display:none; margin-top:6px;">
+    <p>Отправьте другому пользователю:</p>
+    <textarea id="offerOutput" style="height:80px;"></textarea>
+  </div>
+
+  <div id="answerBlock" style="display:none; margin-top:6px;">
+    <p>Вставьте оффер другого пользователя:</p>
+    <textarea id="incomingOffer" style="height:80px;"></textarea>
+    <button id="applyOfferBtn" class="btn" style="width:100%; margin-top:4px;">Принять оффер и создать ответ</button>
+  </div>
+
+  <div id="answerOutputBlock" style="display:none; margin-top:6px;">
+    <p>Отправьте ответ пользователю A:</p>
+    <textarea id="answerOutput" style="height:80px;"></textarea>
+  </div>
+</div>
+
+<script>
+(async () => {
+  const localVideo = document.getElementById('localPeerVideo');
+  const remoteVideo = document.getElementById('remotePeerVideo');
+  const createOfferBtn = document.getElementById('createOfferBtn');
+  const acceptOfferBtn = document.getElementById('acceptOfferBtn');
+  const offerBlock = document.getElementById('offerBlock');
+  const offerOutput = document.getElementById('offerOutput');
+  const answerBlock = document.getElementById('answerBlock');
+  const incomingOffer = document.getElementById('incomingOffer');
+  const applyOfferBtn = document.getElementById('applyOfferBtn');
+  const answerOutputBlock = document.getElementById('answerOutputBlock');
+  const answerOutput = document.getElementById('answerOutput');
+
+  const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+  const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+  stream.getTracks().forEach(track => pc.addTrack(track, stream));
+  localVideo.srcObject = stream;
+
+  pc.ontrack = e => { remoteVideo.srcObject = e.streams[0]; };
+
+  createOfferBtn.onclick = async () => {
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    offerOutput.value = JSON.stringify(offer);
+    offerBlock.style.display = 'block';
+    answerBlock.style.display = 'block';
+  };
+
+  applyOfferBtn.onclick = async () => {
+    if (!incomingOffer.value) return alert("Вставьте оффер!");
+    const offer = JSON.parse(incomingOffer.value);
+    await pc.setRemoteDescription(offer);
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    answerOutput.value = JSON.stringify(answer);
+    answerOutputBlock.style.display = 'block';
+  };
+
+  window.applyPeerAnswer = async (answerJSON) => {
+    const answer = JSON.parse(answerJSON);
+    await pc.setRemoteDescription(answer);
+    alert("Соединение установлено!");
+  };
+})();
+</script>
+
+</body>
+</html>
