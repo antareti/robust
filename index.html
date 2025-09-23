@@ -38,7 +38,7 @@
       z-index: -1;
     }
     h1 {
-      font-size: 8rem; /* ГИГАНТСКИЙ размер */
+      font-size: 8rem;
       font-weight: bold;
       color: #ff9900;
       text-shadow: 0 0 15px #ff9900, 0 0 50px #ff6600;
@@ -135,7 +135,6 @@
     <div class="flex flex-col items-center gap-4">
       <div class="video-wrapper w-full">
         <video id="camera1" autoplay playsinline class="aspect-video"></video>
-        <!-- Маска только на 1-й камере -->
         <svg id="mask1" class="mask-overlay mask-hidden" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
           <path fill="#fff" stroke="#000" stroke-width="6" d="M400 40c-110 0-200 80-220 190c-10 50 10 110 40 140c30 30 70 48 120 48c50 0 90-18 120-48c30-30 50-90 40-140C600 120 510 40 400 40z"/>
           <ellipse cx="320" cy="210" rx="45" ry="28" fill="#000"/>
@@ -167,6 +166,7 @@
     <button id="startBtn" class="btn">🚀 Старт</button>
     <button id="stopBtn" class="btn">⏹ Стоп</button>
     <button id="maskToggle" class="btn">🕶 Маска Анонимуса</button>
+    <button id="chatPageBtn" class="btn">💬 Анонимный чат</button>
   </div>
 
   <script>
@@ -177,6 +177,7 @@
     const startBtn = document.getElementById("startBtn");
     const stopBtn = document.getElementById("stopBtn");
     const maskToggle = document.getElementById("maskToggle");
+    const chatPageBtn = document.getElementById("chatPageBtn");
     const mask1 = document.getElementById("mask1");
 
     let stream1, stream2;
@@ -234,6 +235,10 @@
         mask1.classList.add("mask-hidden");
         maskToggle.textContent = "🕶 Маска Анонимуса";
       }
+    });
+
+    chatPageBtn.addEventListener("click", () => {
+      window.open('chat.html', '_blank');
     });
 
     const canvas = document.getElementById("matrix");
